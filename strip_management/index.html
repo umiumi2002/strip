@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>フライトストリップ管理</title>
+    <style>
+        /* 画面全体に対してピッタリ2分割 */
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh; /* 画面の高さに合わせる */
+            box-sizing: border-box;
+            background-color: black;
+        }
+        #leftPanel, #rightPanel {
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+            border: 10px solid gray;
+            overflow-y: auto; /* ストリップが増えてもスクロールできるようにする */
+        }
+
+
+        .strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #000;
+            background-color: #f0f0f0;
+        }
+
+        .strip div {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .strip input {
+            margin-right: 10px;
+            flex: 2;
+            width: 20px;
+        }
+
+        /* buttonもstrip内に収めたい場合は、flex: 1;を追加する */
+        .strip button {
+            margin-left: 10px;
+            flex: 1;
+            width: 10px;
+        }
+        button, input {
+            padding: 15px;
+            font-size: 16px; /* テキストも見やすいように大きくする */
+            border-radius: 8px; /* ボタンを少し丸くしてタッチしやすく */
+            margin-bottom: 10px;
+        }
+
+
+
+
+
+
+        h2 {
+            color: white;
+        }
+
+        /* タブレットの画面幅に応じてレスポンシブ対応 */
+        @media (max-width: 1024px) {
+            .strip input {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            #leftPanel, #rightPanel {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- <h1>フライトストリップ管理</h1> -->
+
+<div class="container">
+    <div id="leftPanel">
+        <h2>departure</h2>
+        <div id="takeoffStripContainer" class="leftPanel"></div>
+        <button onclick="addStrip('takeoffStripContainer')">離陸ストリップを追加</button>
+    </div>
+    <div id="rightPanel">
+        <h2>arrive</h2>
+        <div id="landingStripContainer"></div>
+        <button onclick="addStrip('landingStripContainer')">着陸ストリップを追加</button>
+    </div>
+</div>
+
+<script>
+    // stripの中のinputをdivで囲みたい場合は、addStrip関数内のinnerHTMLを変更する
+
+
+    function addStrip(containerId) {
+        const container = document.getElementById(containerId);
+        const newStrip = document.createElement('div');
+        newStrip.classList.add('strip');
+        newStrip.innerHTML = `
+
+                <input type="text" placeholder="航空機名">
+                <input type="text" placeholder="滑走路">
+                <input type="text" placeholder="その他情報">    
+                <button onclick="removeStrip(this)">削除</button>   
+        `;
+        container.appendChild(newStrip);
+    }
+
+    function removeStrip(button) {
+        button.parentElement.remove();
+    }
+    let startX;
+
+    function handleTouchStart(event) {
+        startX = event.touches[0].clientX;
+    }
+
+    function handleTouchEnd(event, strip) {
+        const endX = event.changedTouches[0].clientX;
+        if (startX - endX > 50) {
+            // 左にスワイプした場合、削除
+            strip.remove();
+        }
+    }
+
+    function addStrip(containerId) {
+        const container = document.getElementById(containerId);
+        const newStrip = document.createElement('div');
+        newStrip.classList.add('strip');
+        newStrip.innerHTML = `
+            <input type="text" placeholder="航空機名">
+            <input type="text" placeholder="滑走路">
+            <input type="text" placeholder="その他情報">
+        `;
+        newStrip.addEventListener('touchstart', handleTouchStart);
+        newStrip.addEventListener('touchend', function(event) {
+            handleTouchEnd(event, newStrip);
+        });
+        container.appendChild(newStrip);
+    }
+</script>
+
+</body>
+</html>

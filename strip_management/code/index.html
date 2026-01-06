@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>フライトストリップ管理</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- js読み込み -->
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <!-- <h1>フライトストリップ管理</h1> -->
+
+    <div class="container">
+      <div id="leftPanel">
+        <div class="header" draggable="false">
+          <h2>departure</h2>
+          <p class="hidden-count" id = takeoffHiddenCount>非表示ストリップ:   枚</p>
+          <button type="button" onclick="addStrip('takeoffStripContainer')">
+            add strip
+          </button>
+        </div>
+        <div id="takeoffStripContainer" class="leftPanel"></div>
+      </div>
+      <div id="rightPanel">
+        <div class="header">
+        <h2>arrive</h2>
+        <p class="hidden-count" id = landingHiddenCount>非表示ストリップ:   枚</p>
+        <button type="button" onclick="addStrip('landingStripContainer')" id="addArrivalStripButton">
+          add strip
+        </button>
+        </div>
+        <div id="landingStripContainer"></div>
+      </div>
+    </div>
+
+    <script>
+
+    </script>
+  </body>
+</html>
