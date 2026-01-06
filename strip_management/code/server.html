@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket UI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #position {
+            font-size: 20px;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-Time Object Position</h1>
+    <div id="position">Waiting for data...</div>
+
+    <script>
+        // WebSocketサーバーに接続
+        let socket = new WebSocket("ws://yourserveraddress");
+
+        // 接続が開かれた時の処理
+        socket.onopen = function(event) {
+            console.log("Connected to WebSocket server.");
+        };
+
+        // メッセージを受信した時の処理
+        socket.onmessage = function(event) {
+            let data = JSON.parse(event.data);
+            let position = data.position;
+            document.getElementById("position").textContent = 
+                `Position: X=${position.x}, Y=${position.y}, Z=${position.z}`;
+        };
+
+        // エラーが発生した時の処理
+        socket.onerror = function(error) {
+            console.log("WebSocket error: ", error);
+        };
+
+        // 接続が閉じられた時の処理
+        socket.onclose = function(event) {
+            console.log("WebSocket connection closed.");
+        };
+    </script>
+</body>
+</html>

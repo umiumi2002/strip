@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>タイマー</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+
+    #timer {
+      font-size: 160px;
+      margin-bottom: 40px;
+    }
+
+    button {
+      font-size: 12px;
+      margin: 0 10px;
+      padding: 10px 30px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div id="timer">18:00:00</div>
+  <div>
+    <button onclick="startTimer()">スタート</button>
+    <button onclick="stopTimer()">ストップ</button>
+  </div>
+
+  <script>
+    let hours = 18;
+    let minutes = 0;
+    let seconds = 0;
+    let intervalId = null;
+
+    function updateDisplay() {
+      const hh = String(hours).padStart(2, '0');
+      const mm = String(minutes).padStart(2, '0');
+      const ss = String(seconds).padStart(2, '0');
+      document.getElementById("timer").textContent = `${hh}:${mm}:${ss}`;
+    }
+
+    function startTimer() {
+      if (intervalId) return; // 二重スタート防止
+
+      intervalId = setInterval(() => {
+        seconds++;
+        if (seconds >= 60) {
+          seconds = 0;
+          minutes++;
+        }
+        if (minutes >= 60) {
+          minutes = 0;
+          hours++;
+        }
+        updateDisplay();
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+
+    // 初期表示
+    updateDisplay();
+  </script>
+</body>
+</html>
