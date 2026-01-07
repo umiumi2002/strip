@@ -1,7 +1,7 @@
 UserActivation = "use strict";
 
 var request = new XMLHttpRequest();
-request.open("GET", "https://strip-share.onrender.com", true);
+request.open("GET", "https://strip-eip1.onrender.com", true);
 request.responseType = "json";
 
 let flightdata = {};
@@ -26,7 +26,7 @@ setInterval(function () {
 
 function initializeStrips() {
   // ページ読み込み時にサーバーからストリップデータを取得
-  fetch("https://strip-share.onrender.com/get_strips")
+  fetch("https://strip-eip1.onrender.com/get_strips")
     .then((response) => response.json())
     .then((data) => {
       // 出発機のストリップを表示
@@ -62,7 +62,7 @@ async function addStrip(containerId) {
 
   const container = document.getElementById(containerId);
   // サーバーからストリップデータを取得
-  const openData = await fetch("https://strip-share.onrender.com/get_strips")
+  const openData = await fetch("https://strip-eip1.onrender.com/get_strips")
     .then((response) => response.json())
     .then((data) => {
       return data;
@@ -78,7 +78,7 @@ async function addStrip(containerId) {
     console.log("🚀 Adding departure strip:", stripData); // ← 追加！
 
     // サーバーにストリップを追加するリクエストを送信
-    fetch("https://strip-share.onrender.com/add_strip", {
+    fetch("https://strip-eip1.onrender.com/add_strip", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -97,7 +97,7 @@ async function addStrip(containerId) {
     console.log("🚀 Adding arrival strip:", stripData); // ← 追加！
 
     // サーバーにストリップを追加するリクエストを送信
-    fetch("https://strip-share.onrender.com/add_strip", {
+    fetch("https://strip-eip1.onrender.com/add_strip", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -190,7 +190,7 @@ function createStrip(data, containerId) {
     // サーバーに状態を更新するリクエストを送信
     try {
       const response = await fetch(
-        "https://strip-share.onrender.com/update_status",
+        "https://strip-eip1.onrender.com/update_status",
         {
           method: "POST",
           headers: {
@@ -230,7 +230,7 @@ function createStrip(data, containerId) {
 
     try {
       const response = await fetch(
-        "https://strip-share.onrender.com/remove_strip",
+        "https://strip-eip1.onrender.com/remove_strip",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -254,7 +254,7 @@ function createStrip(data, containerId) {
 
 // 緊急時にストリップをarrivalsに追加する関数
 function addEmergencyStripToArrivals(data) {
-  fetch("https://strip-share.onrender.com/update_emergency", {
+  fetch("https://strip-eip1.onrender.com/update_emergency", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -282,7 +282,7 @@ function removeEmergencyStripFromArrivals(containerId) {
   container.removeChild(lastStrip);
 
   // サーバーに更新内容を送信
-  fetch("https://strip-share.onrender.com/update_arrivals", {
+  fetch("https://strip-eip1.onrender.com/update_arrivals", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -362,7 +362,7 @@ function updateOrder(containerId, type) {
     console.log(`New order for ${type}s:`, newOrder);
 
     // サーバーに順番を送信
-    fetch("https://strip-share.onrender.com/update_order", {
+    fetch("https://strip-eip1.onrender.com/update_order", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -447,11 +447,11 @@ function handleDragEnd() {
 
 function updateHiddenStripCounts() {
   // 全ストリップ情報を取得
-  fetch("https://strip-share.onrender.com/")
+  fetch("https://strip-eip1.onrender.com/")
     .then((response) => response.json())
     .then((allStrips) => {
       // 表示中のストリップ情報を取得
-      fetch("https://strip-share.onrender.com/get_strips")
+      fetch("https://strip-eip1.onrender.com/get_strips")
         .then((response) => response.json())
         .then((visibleStrips) => {
           // 離陸の非表示ストリップ数を計算
