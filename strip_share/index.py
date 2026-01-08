@@ -7,6 +7,8 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
+mixed_order = []
+
 # クラスの定義
 class Airplane:
     def __init__(self,id,name,model,runway,time):
@@ -96,6 +98,12 @@ flightStrip.arrivals.append(Airplane(4,"arr004","B788/H","16L",1807))
 # flightStrip.arrivals.append(Airplane(3,"arr3","34R","0"+str(611)))
 # flightStrip.arrivals.append(Airplane(4,"arr4","34R","0"+str(618)))
 # flightStrip.arrivals.append(Airplane(5,"arr5","34R","0"+str(621)))
+
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        return ("", 200)
+
 
 
 @app.route("/",methods=["GET"])
@@ -249,7 +257,41 @@ def update_strips_data(airplane_type, updated_plane):
 def get_strips():
     # 保存されている出発機と到着機の情報を返す
    # 最後に更新された情報のみを返す
-    return jsonify(strips_data)
+    # return jsonify(strips_data)
+    return jsonify({**strips_data, "mixed_order": mixed_order})
+
+
+
+@app.route('/update_order_mixed', methods=['POST'])
+def update_order_mixed():
+    global mixed_order
+    payload = request.get_json(silent=True) or {}
+    order = payload.get("order")
+
+    if not isinstance(order, list):
+        return jsonify({"ok": False, "error": "order must be a list"}), 400
+
+    cleaned = []
+    for item in order:
+        if not isinstance(item, dict):
+            continue
+        _id = item.get("id")
+        _type = item.get("type")
+
+        # idはintに寄せる
+        try:
+            _id = int(_id)
+        except Exception:
+            continue
+
+        # typeは departure/arrival のみ許可
+        if _type not in ("departure", "arrival"):
+            continue
+
+        cleaned.append({"id": _id, "type": _type})
+
+    mixed_order = cleaned
+    return jsonify({"ok": True, "saved_count": len(mixed_order), "mixed_order": mixed_order})
 
 @app.route('/update_strip', methods=['POST'])
 def update_strip():

@@ -1,7 +1,7 @@
 UserActivation = "use strict";
 
 var request = new XMLHttpRequest();
-request.open("GET", "https://strip-share.onrender.com", true);
+request.open("GET", "https://strip-eip1.onrender.com", true);
 request.responseType = "json";
 
 let flightdata = {};
@@ -20,39 +20,83 @@ request.onload = function () {
 request.send();
 
 //10秒ごとに画面をリロード
-setInterval(function () {
-  location.reload();
-}, 10000);
+// setInterval(function () {
+//   location.reload();
+// }, 10000);
+
+function timeToSeconds(t) {
+  if (t == null) return Number.POSITIVE_INFINITY;
+
+  const s = String(t).trim();
+
+  // "0623" / "623" / 623 みたいなHHMM
+  if (/^\d{3,4}$/.test(s)) {
+    const n = parseInt(s, 10);
+    const h = Math.floor(n / 100);
+    const m = n % 100;
+    if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return h * 3600 + m * 60;
+    return Number.POSITIVE_INFINITY;
+  }
+
+  // "06:23" / "6:23" / "06:23:10" も一応対応
+  if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(s)) {
+    const parts = s.split(":").map(Number);
+    const [h, m, sec = 0] = parts;
+    if ([h, m, sec].some(Number.isNaN)) return Number.POSITIVE_INFINITY;
+    return h * 3600 + m * 60 + sec;
+  }
+
+  return Number.POSITIVE_INFINITY;
+}
+
 
 function initializeStrips() {
-  // ページ読み込み時にサーバーからストリップデータを取得
-  fetch("https://strip-share.onrender.com/get_strips")
+  fetch("https://strip-eip1.onrender.com/get_strips")
     .then((response) => response.json())
     .then((data) => {
-      // 出発機のストリップを表示
-      data.departures.forEach((stripData) => {
-        const container = document.getElementById("takeoffStripContainer");
-        // 既にIDが追加されているか確認
-        // if (!document.querySelector(`[data-id="${stripData.id}"]`)) {
-        const strip = createStrip(stripData, "takeoffStripContainer");
-        container.appendChild(strip);
-        // }
+      const container = document.getElementById("stripContainer");
+      container.innerHTML = "";
+
+      const depMap = new Map((data.departures || []).map(d => [d.id, d]));
+      const arrMap = new Map((data.arrivals || []).map(a => [a.id, a]));
+
+      // ★保存順があれば最優先で描画
+      if (Array.isArray(data.mixed_order) && data.mixed_order.length > 0) {
+        data.mixed_order.forEach(({ id, type }) => {
+          const item = (type === "departure") ? depMap.get(id) : arrMap.get(id);
+          if (!item) return;
+
+          container.appendChild(createStrip(item, type));
+          if (type === "departure") depMap.delete(id);
+          else arrMap.delete(id);
+        });
+
+        // 保存順に含まれない新規ストリップは末尾に追加（時刻順）
+        const rest = [
+          ...Array.from(depMap.values()).map(x => ({ ...x, _type: "departure" })),
+          ...Array.from(arrMap.values()).map(x => ({ ...x, _type: "arrival" })),
+        ];
+        rest.sort((x, y) => timeToSeconds(x.time) - timeToSeconds(y.time));
+        rest.forEach(x => container.appendChild(createStrip(x, x._type)));
+
+        return; // ★ここで終わり
+      }
+
+      // ★保存順がない初期状態は時刻順で混在表示
+      const merged = [
+        ...(data.departures || []).map(d => ({ ...d, _type: "departure" })),
+        ...(data.arrivals || []).map(a => ({ ...a, _type: "arrival" })),
+      ];
+
+      merged.sort((x, y) => {
+        const diff = timeToSeconds(x.time) - timeToSeconds(y.time);
+        if (diff !== 0) return diff;
+        return (x._type === "departure" ? -1 : 1);
       });
 
-      // 到着機のストリップを表示
-      data.arrivals.forEach((stripData) => {
-        console.log(stripData);
-        const container = document.getElementById("landingStripContainer");
-        // 既にIDが追加されているか確認
-        // if (!document.querySelector(`[data-id="${stripData.id}"]`)) {
-        const strip = createStrip(stripData, "landingStripContainer");
-        container.appendChild(strip);
-        //  }
+      merged.forEach((stripData) => {
+        container.appendChild(createStrip(stripData, stripData._type));
       });
-
-      console.log("data", data);
-
-      return data;
     })
     .catch((error) => console.error("データの取得エラー:", error));
 }
@@ -62,7 +106,7 @@ async function addStrip(containerId) {
 
   const container = document.getElementById(containerId);
   // サーバーからストリップデータを取得
-  const openData = await fetch("https://strip-share.onrender.com/get_strips")
+  const openData = await fetch("https://strip-eip1.onrender.com/get_strips")
     .then((response) => response.json())
     .then((data) => {
       return data;
@@ -78,7 +122,7 @@ async function addStrip(containerId) {
     console.log("🚀 Adding departure strip:", stripData); // ← 追加！
 
     // サーバーにストリップを追加するリクエストを送信
-    fetch("https://strip-share.onrender.com/add_strip", {
+    fetch("https://strip-eip1.onrender.com/add_strip", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -97,7 +141,7 @@ async function addStrip(containerId) {
     console.log("🚀 Adding arrival strip:", stripData); // ← 追加！
 
     // サーバーにストリップを追加するリクエストを送信
-    fetch("https://strip-share.onrender.com/add_strip", {
+    fetch("https://strip-eip1.onrender.com/add_strip", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -111,12 +155,16 @@ async function addStrip(containerId) {
 }
 
 // ストリップを作成する関数
-function createStrip(data, containerId) {
+function createStrip(data, type) {
   const { id, name, model, runway, time, is_completed } = data;
   const strip = document.createElement("div");
   strip.classList.add("strip");
 
-  const isArrivePanel = containerId === "landingStripContainer";
+  strip.dataset.id = id;
+  strip.dataset.type = type; // "departure" or "arrival"
+
+  const isArrivePanel = type === "arrival";
+  strip.classList.add(isArrivePanel ? "strip-arr" : "strip-dep");
 
   strip.innerHTML = `
     <div class="strip-row-top">
@@ -190,7 +238,7 @@ function createStrip(data, containerId) {
     // サーバーに状態を更新するリクエストを送信
     try {
       const response = await fetch(
-        "https://strip-share.onrender.com/update_status",
+        "https://strip-eip1.onrender.com/update_status",
         {
           method: "POST",
           headers: {
@@ -230,7 +278,7 @@ function createStrip(data, containerId) {
 
     try {
       const response = await fetch(
-        "https://strip-share.onrender.com/remove_strip",
+        "https://strip-eip1.onrender.com/remove_strip",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -254,7 +302,7 @@ function createStrip(data, containerId) {
 
 // 緊急時にストリップをarrivalsに追加する関数
 function addEmergencyStripToArrivals(data) {
-  fetch("https://strip-share.onrender.com/update_emergency", {
+  fetch("https://strip-eip1.onrender.com/update_emergency", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -282,7 +330,7 @@ function removeEmergencyStripFromArrivals(containerId) {
   container.removeChild(lastStrip);
 
   // サーバーに更新内容を送信
-  fetch("https://strip-share.onrender.com/update_arrivals", {
+  fetch("https://strip-eip1.onrender.com/update_arrivals", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -346,6 +394,8 @@ function handleTouchEnd() {
 
   // 親要素が landingStripContainer の場合
   updateOrder("landingStripContainer", "arrival");
+
+  updateMixedOrder();
 }
 
 // 共通の順番取得＆送信処理を関数化
@@ -362,7 +412,7 @@ function updateOrder(containerId, type) {
     console.log(`New order for ${type}s:`, newOrder);
 
     // サーバーに順番を送信
-    fetch("https://strip-share.onrender.com/update_order", {
+    fetch("https://strip-eip1.onrender.com/update_order", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -384,6 +434,31 @@ function updateOrder(containerId, type) {
       );
   }
 }
+
+function updateMixedOrder() {
+  const container = document.getElementById("stripContainer");
+  if (!container) return;
+
+  const order = Array.from(container.querySelectorAll(".strip")).map((el) => ({
+    id: parseInt(el.dataset.id, 10),
+    type: el.dataset.type, // "departure" or "arrival"
+  }));
+
+  console.log("New mixed order:", order);
+
+  fetch("https://strip-eip1.onrender.com/update_order_mixed", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ order }),
+  })
+    .then((r) => {
+      if (!r.ok) throw new Error("Network response was not ok");
+      return r.json();
+    })
+    .then((data) => console.log("Mixed order saved:", data))
+    .catch((e) => console.error("Error saving mixed order:", e));
+}
+
 
 // inputフィールドのクリック時にタッチイベントを無効化
 document.querySelectorAll("input").forEach((input) => {
@@ -443,15 +518,17 @@ function handleDrop(event) {
 function handleDragEnd() {
   this.classList.remove("dragging");
   draggedElement = null; // ドラッグ要素をリセット
+
+  updateMixedOrder();
 }
 
 function updateHiddenStripCounts() {
   // 全ストリップ情報を取得
-  fetch("https://strip-share.onrender.com/")
+  fetch("https://strip-eip1.onrender.com/")
     .then((response) => response.json())
     .then((allStrips) => {
       // 表示中のストリップ情報を取得
-      fetch("https://strip-share.onrender.com/get_strips")
+      fetch("https://strip-eip1.onrender.com/get_strips")
         .then((response) => response.json())
         .then((visibleStrips) => {
           // 離陸の非表示ストリップ数を計算

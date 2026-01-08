@@ -11,7 +11,7 @@
   <body>
     <!-- <h1>フライトストリップ管理</h1> -->
 
-    <div class="container">
+    <!-- <div class="container">
       <div id="leftPanel">
         <div class="header" draggable="false">
           <h2>departure</h2>
@@ -32,7 +32,36 @@
         </div>
         <div id="landingStripContainer"></div>
       </div>
+    </div> -->
+<div class="main">
+<div class="container single-column">
+  <div class="header header-mixed" draggable="false">
+    <div class="header-block dep">
+      <p>departure</p>
+      <p class="hidden-count" id="takeoffHiddenCount">非表示ストリップ:  枚</p>
+      <button type="button" onclick="addStrip('takeoffStripContainer')">add strip</button>
     </div>
+
+    <div class="header-block arr">
+      <p>arrive</p>
+      <p class="hidden-count" id="landingHiddenCount">非表示ストリップ:  枚</p>
+      <button type="button" onclick="addStrip('landingStripContainer')" id="addArrivalStripButton">add strip</button>
+    </div>
+  </div>
+
+  <!-- ★ここに混在表示 -->
+  <div id="stripContainer" class="stripContainer"></div>
+</div>
+<div class="container single-column">
+
+
+</div>
+<div class="container single-column">
+
+</div>
+</div>
+
+
 
     <script>
 
