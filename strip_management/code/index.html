@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>フライトストリップ管理</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
     <!-- js読み込み -->
     <script src="script.js"></script>
   </head>
@@ -33,38 +33,52 @@
         <div id="landingStripContainer"></div>
       </div>
     </div> -->
-<div class="main">
-<div class="container single-column">
-  <div class="header header-mixed" draggable="false">
-    <div class="header-block dep">
-      <p>departure</p>
-      <p class="hidden-count" id="takeoffHiddenCount">非表示ストリップ:  枚</p>
-      <button type="button" onclick="addStrip('takeoffStripContainer')">add strip</button>
+    <div class="main">
+      <div class="container single-column">
+        <div class="header header-mixed" draggable="false">
+          <div class="header-block dep">
+            <p>departure</p>
+            <p class="hidden-count" id="takeoffHiddenCount">
+              非表示ストリップ: 枚
+            </p>
+            <button type="button" onclick="addStrip('takeoffStripContainer')">
+              add strip
+            </button>
+          </div>
+
+          <div class="header-block arr">
+            <p>arrive</p>
+            <p class="hidden-count" id="landingHiddenCount">
+              非表示ストリップ: 枚
+            </p>
+            <button
+              type="button"
+              onclick="addStrip('landingStripContainer')"
+              id="addArrivalStripButton"
+            >
+              add strip
+            </button>
+          </div>
+        </div>
+
+        <!-- ★ここに混在表示 -->
+        <div id="stripContainerLeft" class="stripContainer"></div>
+      </div>
+      <div class="container single-column">
+        <div class="header header-mixed" draggable="false">
+          <p style="color: white; margin: 0">(middle)</p>
+        </div>
+
+        <!-- ★中央の置き場 -->
+        <div id="stripContainerMid" class="stripContainer"></div>
+      </div>
+      <div class="container single-column">
+        <div class="header header-mixed" draggable="false">
+          <p style="color: white; margin: 0">(right)</p>
+        </div>
+      </div>
     </div>
 
-    <div class="header-block arr">
-      <p>arrive</p>
-      <p class="hidden-count" id="landingHiddenCount">非表示ストリップ:  枚</p>
-      <button type="button" onclick="addStrip('landingStripContainer')" id="addArrivalStripButton">add strip</button>
-    </div>
-  </div>
-
-  <!-- ★ここに混在表示 -->
-  <div id="stripContainer" class="stripContainer"></div>
-</div>
-<div class="container single-column">
-
-
-</div>
-<div class="container single-column">
-
-</div>
-</div>
-
-
-
-    <script>
-
-    </script>
+    <script></script>
   </body>
 </html>

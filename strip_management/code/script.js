@@ -20,9 +20,9 @@ request.onload = function () {
 request.send();
 
 //10秒ごとに画面をリロード
-// setInterval(function () {
-//   location.reload();
-// }, 10000);
+setInterval(function () {
+  location.reload();
+}, 10000);
 
 function timeToSeconds(t) {
   if (t == null) return Number.POSITIVE_INFINITY;
@@ -54,33 +54,36 @@ function initializeStrips() {
   fetch("https://strip-1-fv9b.onrender.com/get_strips")
     .then((response) => response.json())
     .then((data) => {
-      const container = document.getElementById("stripContainer");
-      container.innerHTML = "";
+      const left = document.getElementById("stripContainerLeft");
+      const mid  = document.getElementById("stripContainerMid");
+      left.innerHTML = "";
+      mid.innerHTML  = "";
 
-      const depMap = new Map((data.departures || []).map(d => [d.id, d]));
-      const arrMap = new Map((data.arrivals || []).map(a => [a.id, a]));
 
-      // ★保存順があれば最優先で描画
-      if (Array.isArray(data.mixed_order) && data.mixed_order.length > 0) {
-        data.mixed_order.forEach(({ id, type }) => {
-          const item = (type === "departure") ? depMap.get(id) : arrMap.get(id);
-          if (!item) return;
+      // const depMap = new Map((data.departures || []).map(d => [d.id, d]));
+      // const arrMap = new Map((data.arrivals || []).map(a => [a.id, a]));
 
-          container.appendChild(createStrip(item, type));
-          if (type === "departure") depMap.delete(id);
-          else arrMap.delete(id);
-        });
+      // // ★保存順があれば最優先で描画
+      // if (Array.isArray(data.mixed_order) && data.mixed_order.length > 0) {
+      //   data.mixed_order.forEach(({ id, type }) => {
+      //     const item = (type === "departure") ? depMap.get(id) : arrMap.get(id);
+      //     if (!item) return;
 
-        // 保存順に含まれない新規ストリップは末尾に追加（時刻順）
-        const rest = [
-          ...Array.from(depMap.values()).map(x => ({ ...x, _type: "departure" })),
-          ...Array.from(arrMap.values()).map(x => ({ ...x, _type: "arrival" })),
-        ];
-        rest.sort((x, y) => timeToSeconds(x.time) - timeToSeconds(y.time));
-        rest.forEach(x => container.appendChild(createStrip(x, x._type)));
+      //     left.appendChild(createStrip(item, type));
+      //     if (type === "departure") depMap.delete(id);
+      //     else arrMap.delete(id);
+      //   });
 
-        return; // ★ここで終わり
-      }
+      //   // 保存順に含まれない新規ストリップは末尾に追加（時刻順）
+      //   const rest = [
+      //     ...Array.from(depMap.values()).map(x => ({ ...x, _type: "departure" })),
+      //     ...Array.from(arrMap.values()).map(x => ({ ...x, _type: "arrival" })),
+      //   ];
+      //   rest.sort((x, y) => timeToSeconds(x.time) - timeToSeconds(y.time));
+      //   rest.forEach(x => left.appendChild(createStrip(x, x._type)));
+
+      //   return; // ★ここで終わり
+      // }
 
       // ★保存順がない初期状態は時刻順で混在表示
       const merged = [
@@ -94,8 +97,43 @@ function initializeStrips() {
         return (x._type === "departure" ? -1 : 1);
       });
 
-      merged.forEach((stripData) => {
-        container.appendChild(createStrip(stripData, stripData._type));
+      let finalList = [];
+
+      const mixed = Array.isArray(data.mixed_order) ? data.mixed_order : [];
+
+      if (mixed.length > 0) {
+        // 速く引けるように map を作る（キーは "type:id"）
+        const map = new Map();
+        merged.forEach(x => map.set(`${x._type}:${x.id}`, x));
+
+        // 保存された順番で取り出す
+        mixed.forEach(it => {
+          const k = `${it.type}:${it.id}`;
+          const item = map.get(k);
+          if (item) {
+            item._lane = it.lane || "left"; // ★中央保持
+            finalList.push(item);
+            map.delete(k);
+          }
+        });
+
+        // 保存に無い新規データは末尾（左に入れる）
+        for (const item of map.values()) {
+          item._lane = "left";
+          finalList.push(item);
+        }
+      } else {
+        // 保存が無いときは time順
+        finalList = merged;
+        finalList.forEach(x => x._lane = "left"); // 初期は左でOK
+      }
+      // ---- 復元処理ここまで ----
+
+      finalList.forEach(s => {
+        const el = createStrip(s, s._type);
+        const lane = s._lane || "left";
+        if (lane === "mid") mid.appendChild(el);
+        else left.appendChild(el);
       });
     })
     .catch((error) => console.error("データの取得エラー:", error));
@@ -200,8 +238,8 @@ function createStrip(data, type) {
   strip.addEventListener("drop", handleDrop);
   strip.addEventListener("dragend", handleDragEnd);
   // タッチ操作（タブレット用）
-  strip.addEventListener("touchstart", handleTouchStart);
-  strip.addEventListener("touchmove", handleTouchMove);
+  strip.addEventListener("touchstart", handleTouchStart,{ passive: false });
+  strip.addEventListener("touchmove", handleTouchMove,{ passive: false });
   strip.addEventListener("touchend", handleTouchEnd);
 
   let isEmergency = false; // 緊急状態を管理するフラグ
@@ -345,58 +383,168 @@ function removeEmergencyStripFromArrivals(containerId) {
 }
 
 let touchStartY = 0; // タッチの開始位置を記録
-let touchStartElement = null; // ドラッグしている要素を記録
+
+// function handleTouchStart(event) {
+//   if (event.target.tagName === "INPUT") {
+//     return; // inputフィールド内でのタッチを無視
+//   }
+//   touchStartElement = this; // タッチした要素を保持
+//   console.log("touchStartElement", touchStartElement);
+//   touchStartY = event.touches[0].clientY; // タッチ開始位置を記録
+//   this.classList.add("dragging"); // 視覚的なドラッグ中の効果を追加
+// }
+
+// function handleTouchMove(event) {
+//   event.preventDefault(); // スクロール動作を防止
+
+//   if (event.target.tagName === "INPUT") {
+//     return; // inputフィールド内でのタッチ動作を無視
+//   }
+//   const touchY = event.touches[0].clientY; // 現在のタッチ位置
+
+//   const container = this.parentElement; // 親要素を取得
+//   const allStrips = Array.from(container.children); // 全ストリップを配列化
+//   const targetElement = allStrips.find((strip) => {
+//     const rect = strip.getBoundingClientRect();
+//     return touchY >= rect.top && touchY <= rect.bottom;
+//   });
+
+//   if (targetElement && targetElement !== touchStartElement) {
+//     const targetIndex = allStrips.indexOf(targetElement);
+//     const draggedIndex = allStrips.indexOf(touchStartElement);
+
+//     if (draggedIndex < targetIndex) {
+//       container.insertBefore(touchStartElement, targetElement.nextSibling);
+//     } else {
+//       container.insertBefore(touchStartElement, targetElement);
+//     }
+//   }
+// }
+
+// function handleTouchEnd() {
+//   this.classList.remove("dragging"); // 視覚効果をリセット
+//   touchStartElement = null; // 状態をリセット
+//   touchStartY = 0;
+
+//   // 親要素が takeoffStripContainer の場合
+//   updateOrder("takeoffStripContainer", "departure");
+
+//   // 親要素が landingStripContainer の場合
+//   updateOrder("landingStripContainer", "arrival");
+
+//   updateMixedOrder();
+// }
+
+
+let touchStartElement = null;
+let touchDragging = false;
+
+function getZones() {
+  const left = document.getElementById("stripContainerLeft");
+  const mid  = document.getElementById("stripContainerMid");
+  return [left, mid].filter(Boolean);
+}
+
+// 指の位置(touchX,touchY)が乗ってる置き場を返す（なければnull）
+function getZoneFromPoint(x, y) {
+  const zones = getZones();
+  for (const z of zones) {
+    const r = z.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return z;
+  }
+  return null;
+}
+
+// 置き場内で、touchYに最も自然な挿入位置（before）を決める
+function getBeforeElementInZone(zone, touchY, draggingEl) {
+  const items = Array.from(zone.querySelectorAll(".strip"))
+    .filter(el => el !== draggingEl);
+
+  for (const el of items) {
+    const r = el.getBoundingClientRect();
+    const midY = r.top + r.height / 2;
+    if (touchY < midY) return el; // この要素の前に入れる
+  }
+  return null; // 末尾
+}
 
 function handleTouchStart(event) {
-  if (event.target.tagName === "INPUT") {
-    return; // inputフィールド内でのタッチを無視
-  }
-  touchStartElement = this; // タッチした要素を保持
-  console.log("touchStartElement", touchStartElement);
-  touchStartY = event.touches[0].clientY; // タッチ開始位置を記録
-  this.classList.add("dragging"); // 視覚的なドラッグ中の効果を追加
+  // inputやボタンは通常操作を優先（ドラッグ開始しない）
+  if (event.target.tagName === "INPUT") return;
+  if (event.target.closest("button")) return;
+
+  touchStartElement = this;
+  touchDragging = true;
+  this.classList.add("dragging");
 }
 
 function handleTouchMove(event) {
-  event.preventDefault(); // スクロール動作を防止
+  if (!touchDragging || !touchStartElement) return;
 
-  if (event.target.tagName === "INPUT") {
-    return; // inputフィールド内でのタッチ動作を無視
-  }
-  const touchY = event.touches[0].clientY; // 現在のタッチ位置
+  event.preventDefault(); // スクロール防止（ドラッグ中だけ）
+  const t = event.touches[0];
+  const x = t.clientX;
+  const y = t.clientY;
 
-  const container = this.parentElement; // 親要素を取得
-  const allStrips = Array.from(container.children); // 全ストリップを配列化
-  const targetElement = allStrips.find((strip) => {
-    const rect = strip.getBoundingClientRect();
-    return touchY >= rect.top && touchY <= rect.bottom;
-  });
+  const zone = getZoneFromPoint(x, y);
+  if (!zone) return; // 置き場外なら何もしない
 
-  if (targetElement && targetElement !== touchStartElement) {
-    const targetIndex = allStrips.indexOf(targetElement);
-    const draggedIndex = allStrips.indexOf(touchStartElement);
+  // 置き場の中で挿入位置を決める
+  const before = getBeforeElementInZone(zone, y, touchStartElement);
 
-    if (draggedIndex < targetIndex) {
-      container.insertBefore(touchStartElement, targetElement.nextSibling);
-    } else {
-      container.insertBefore(touchStartElement, targetElement);
-    }
-  }
+  // まだ別ゾーンに入ってない場合も含めて移動
+  if (before) zone.insertBefore(touchStartElement, before);
+  else zone.appendChild(touchStartElement);
 }
 
 function handleTouchEnd() {
-  this.classList.remove("dragging"); // 視覚効果をリセット
-  touchStartElement = null; // 状態をリセット
-  touchStartY = 0;
+  if (!touchStartElement) return;
 
-  // 親要素が takeoffStripContainer の場合
-  updateOrder("takeoffStripContainer", "departure");
+  touchStartElement.classList.remove("dragging");
+  touchStartElement = null;
+  touchDragging = false;
 
-  // 親要素が landingStripContainer の場合
-  updateOrder("landingStripContainer", "arrival");
-
-  updateMixedOrder();
+  // 左+中央の結合順で保存
+  updateMixedOrderTwoCols();
 }
+
+async function updateMixedOrderTwoCols() {
+  const left = document.getElementById("stripContainerLeft");
+  const mid  = document.getElementById("stripContainerMid");
+  if (!left || !mid) return;
+
+  const order = [
+    ...Array.from(left.querySelectorAll(".strip")).map(el => ({
+      id: parseInt(el.dataset.id, 10),
+      type: el.dataset.type,
+      lane: "left",
+    })),
+    ...Array.from(mid.querySelectorAll(".strip")).map(el => ({
+      id: parseInt(el.dataset.id, 10),
+      type: el.dataset.type,
+      lane: "mid",
+    })),
+  ];
+
+  console.log("📌 saving mixed order:", order);
+
+  try {
+    const res = await fetch("https://strip-1-fv9b.onrender.com/update_order_mixed", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order }),
+    });
+
+    const text = await res.text();
+    console.log("✅ save response:", res.status, text);
+
+    if (!res.ok) throw new Error(`save failed: ${res.status}`);
+  } catch (e) {
+    console.error("❌ Error saving mixed order:", e);
+  }
+}
+
+
 
 // 共通の順番取得＆送信処理を関数化
 function updateOrder(containerId, type) {

@@ -243,7 +243,7 @@ def update_status():
             return jsonify({"message": "Updated successfully", "updated_plane": plane.to_dict()}), 200
     return jsonify({"error": "Airplane not found"}), 404
 
-   
+
 def update_strips_data(airplane_type, updated_plane):
     # `strips_data` を更新する
     target_list = strips_data["arrivals"] if airplane_type == "arrival" else strips_data["departures"]
@@ -256,7 +256,7 @@ def update_strips_data(airplane_type, updated_plane):
 @app.route('/get_strips', methods=['GET'])
 def get_strips():
     # 保存されている出発機と到着機の情報を返す
-   # 最後に更新された情報のみを返す
+    # 最後に更新された情報のみを返す
     # return jsonify(strips_data)
     return jsonify({**strips_data, "mixed_order": mixed_order})
 
@@ -267,6 +267,8 @@ def update_order_mixed():
     global mixed_order
     payload = request.get_json(silent=True) or {}
     order = payload.get("order")
+    print("オーダー:", order)
+
 
     if not isinstance(order, list):
         return jsonify({"ok": False, "error": "order must be a list"}), 400
@@ -287,8 +289,11 @@ def update_order_mixed():
         # typeは departure/arrival のみ許可
         if _type not in ("departure", "arrival"):
             continue
+        lane = item.get("lane")
+        if lane not in ("left", "mid"):
+            lane = "left"  # デフォルト
 
-        cleaned.append({"id": _id, "type": _type})
+        cleaned.append({"id": _id, "type": _type,"lane": lane})
 
     mixed_order = cleaned
     return jsonify({"ok": True, "saved_count": len(mixed_order), "mixed_order": mixed_order})

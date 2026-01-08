@@ -7,7 +7,7 @@
 
 .container.single-column {
     flex: 1;
-    display: flex;
+    /* display: flex; */
     width: 100%;
     height: 100vh; /* 画面の高さに合わせる */
     box-sizing: border-box;
@@ -24,6 +24,11 @@
     border: 3px solid gray;
     overflow-y: auto; /* ストリップが増えてもスクロールできるようにする */
 }
+
+.stripContainer{
+  min-height: 100vh; /* ★空でもドロップ可能にする */
+}
+
 .strip {
     display: flex;
     justify-content: space-between;
