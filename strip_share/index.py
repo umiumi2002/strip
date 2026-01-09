@@ -122,7 +122,7 @@ def update_emergency():
         last_arrival_time = flightStrip.arrivals[-1].time
 
         # 新しい到着機データを作成
-        new_flight = Airplane(arrival_count + 1, f'arr{arrival_count + 1}', '16L', last_arrival_time + 5)
+        new_flight = Airplane(arrival_count + 1, f'arr{arrival_count + 1}', 'B77W/H', '16L', last_arrival_time + 5)
 
         # 新しい到着機を arrivals に追加
         flightStrip.add_arrival(new_flight)
@@ -267,8 +267,6 @@ def update_order_mixed():
     global mixed_order
     payload = request.get_json(silent=True) or {}
     order = payload.get("order")
-    print("オーダー:", order)
-
 
     if not isinstance(order, list):
         return jsonify({"ok": False, "error": "order must be a list"}), 400

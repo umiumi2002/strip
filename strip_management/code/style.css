@@ -26,7 +26,7 @@
 }
 
 .stripContainer{
-  min-height: 100vh; /* ★空でもドロップ可能にする */
+  /* min-height: 100vh; ★空でもドロップ可能にする */
 }
 
 .strip {

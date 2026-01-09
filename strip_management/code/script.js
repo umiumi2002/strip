@@ -20,9 +20,9 @@ request.onload = function () {
 request.send();
 
 //10秒ごとに画面をリロード
-setInterval(function () {
-  location.reload();
-}, 10000);
+// setInterval(function () {
+//   location.reload();
+// }, 10000);
 
 function timeToSeconds(t) {
   if (t == null) return Number.POSITIVE_INFINITY;
@@ -249,7 +249,7 @@ function createStrip(data, type) {
     emergencyButton.addEventListener("click", function () {
       if (!isEmergency) {
         // setTimeout(() => {
-        addEmergencyStripToArrivals(containerId, data); // 緊急ストリップを追加
+        addEmergencyStripToArrivals(); // 緊急ストリップを追加
         this.textContent = "復行";
         // }, 3000);
       } else {
@@ -335,25 +335,33 @@ function createStrip(data, type) {
     }
   });
 
+  // addEmergencyStripToArrivals(data).then(() => initializeStrips());
+
   return strip;
 }
 
 // 緊急時にストリップをarrivalsに追加する関数
-function addEmergencyStripToArrivals(data) {
-  fetch("https://strip-1-fv9b.onrender.com/update_emergency", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log("Emergency flight added:", data);
-      // 追加後の到着機データを表示などの処理を行う
-    })
-    .catch((error) => {
-      console.error("Error:", error);
+async function addEmergencyStripToArrivals(data) {
+    try {
+    const res = await fetch("https://strip-1-fv9b.onrender.com/update_emergency", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
     });
+
+    // ★ 500でも本文を読む（JSONじゃない可能性もあるので text）
+    const text = await res.text();
+    console.log("update_emergency status:", res.status);
+    console.log("update_emergency body:", text);
+
+    if (!res.ok) throw new Error(`update_emergency failed: ${res.status}`);
+
+    initializeStrips(); // 画面を更新
+    updateHiddenStripCounts();
+    
+  } catch(error)  {
+      console.error("Error:", error);
+    }
+    // ここで止める（500なら何が返ってるか確認）
 }
 
 // 緊急ストリップを削除する関数
