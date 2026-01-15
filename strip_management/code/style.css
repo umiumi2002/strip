@@ -1,6 +1,7 @@
  /* 画面全体に対してピッタリ2分割 */
 .main{
     display: flex;
+    height: 100%;
     
 
 }
@@ -9,7 +10,7 @@
     flex: 1;
     /* display: flex; */
     width: 100%;
-    height: 100vh; /* 画面の高さに合わせる */
+    height: 100vh;
     box-sizing: border-box;
     background-color: black;
     /* 画面全体に対してピッタリ3分割 */
@@ -26,7 +27,8 @@
 }
 
 .stripContainer{
-  /* min-height: 100vh; ★空でもドロップ可能にする */
+  min-height: 80vh; 
+  /* めちゃ重要 */
 }
 
 .strip {
@@ -44,7 +46,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
+  /* margin-top: 8px; */
 }
 
 .strip-buttons {
@@ -107,7 +109,7 @@
 
   /* buttonもstrip内に収めたい場合は、flex: 1;を追加する */
   .strip button {
-    flex: 0 0 70px; 
+    flex: 0 0 50px; 
     margin-left: 10px;
     /* flex: 1; */
     width: 10px;
@@ -172,6 +174,7 @@
   p{
     color: white;
     margin: 0;
+    font-weight: bold;
   }
 
   .check-mark {
@@ -214,6 +217,87 @@
 }
 .header-mixed .header-block.dep { border-left: 10px solid; }
 .header-mixed .header-block.arr { border-left: 10px solid;  }
+
+.dep div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.arr div {
+  display: flex;
+  justify-content: space-between;
+}
+
+
+/* 右カラムの風向風速計パネル */
+.wind-panel {
+  padding: 12px;
+  color: white;
+  /* height: 100%; */
+  min-height: 0;
+  display: flex;
+}
+
+.wind-stack {
+  height: 70%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+/* 1項目（DIR / SPD） */
+.wind-item {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+/* 左のラベル */
+.wind-label {
+  font-size: 16px;
+  opacity: 0.9;
+  width: 48px;
+  flex: 0 0 48px ;
+}
+
+.wind-ring {
+  width: 70%;              /* 親に対する割合 */
+  max-width: 250px;     /* 最大サイズ */
+  aspect-ratio: 1 / 1;     /* 正円を維持 */
+  border: 10px solid red;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+}
+
+
+/* 中の数字 */
+.wind-ring input {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: white;
+  font-size: 100px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1;
+
+  /* 数字入力っぽさを消す */
+  appearance: textfield;
+}
+
+/* Chrome / Safari の ↑↓スピンボタンを消す */
+.wind-ring input::-webkit-outer-spin-button,
+.wind-ring input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 
 
   /* タブレットの画面幅に応じてレスポンシブ対応 */

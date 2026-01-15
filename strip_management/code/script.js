@@ -8,21 +8,20 @@ let flightdata = {};
 request.onload = function () {
   flightdata = this.response;
   console.log(flightdata);
-
+  initWindPersistence();
   // ページ読み込み時に初期データを表示
   initializeStrips();
   // ページ読み込み時と定期的に更新
   updateHiddenStripCounts();
-
   // enableDragAndDrop("takeoffStripContainer");
   // enableDragAndDrop("landingStripContainer");
 };
 request.send();
 
 //10秒ごとに画面をリロード
-// setInterval(function () {
-//   location.reload();
-// }, 10000);
+setInterval(function () {
+  location.reload();
+}, 10000);
 
 function timeToSeconds(t) {
   if (t == null) return Number.POSITIVE_INFINITY;
@@ -129,12 +128,14 @@ function initializeStrips() {
       }
       // ---- 復元処理ここまで ----
 
+
       finalList.forEach(s => {
         const el = createStrip(s, s._type);
         const lane = s._lane || "left";
         if (lane === "mid") mid.appendChild(el);
         else left.appendChild(el);
       });
+      enableDnDForZones();
     })
     .catch((error) => console.error("データの取得エラー:", error));
 }
@@ -197,6 +198,8 @@ function createStrip(data, type) {
   const { id, name, model, runway, time, is_completed } = data;
   const strip = document.createElement("div");
   strip.classList.add("strip");
+
+  strip.draggable = true;
 
   strip.dataset.id = id;
   strip.dataset.type = type; // "departure" or "arrival"
@@ -455,13 +458,11 @@ function getZones() {
 
 // 指の位置(touchX,touchY)が乗ってる置き場を返す（なければnull）
 function getZoneFromPoint(x, y) {
-  const zones = getZones();
-  for (const z of zones) {
-    const r = z.getBoundingClientRect();
-    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return z;
-  }
-  return null;
+  const el = document.elementFromPoint(x, y);
+  if (!el) return null;
+  return el.closest("#stripContainerLeft, #stripContainerMid");
 }
+
 
 // 置き場内で、touchYに最も自然な挿入位置（before）を決める
 function getBeforeElementInZone(zone, touchY, draggingEl) {
@@ -496,6 +497,8 @@ function handleTouchMove(event) {
 
   const zone = getZoneFromPoint(x, y);
   if (!zone) return; // 置き場外なら何もしない
+  console.log("touch at", x, y, "zone:", zone ? zone.id : "none");
+
 
   // 置き場の中で挿入位置を決める
   const before = getBeforeElementInZone(zone, y, touchStartElement);
@@ -515,6 +518,46 @@ function handleTouchEnd() {
   // 左+中央の結合順で保存
   updateMixedOrderTwoCols();
 }
+
+function getBeforeElementInZone(zone, clientY, draggingEl) {
+  const items = Array.from(zone.querySelectorAll(".strip"))
+    .filter(el => el !== draggingEl);
+
+  for (const el of items) {
+    const r = el.getBoundingClientRect();
+    const midY = r.top + r.height / 2;
+    if (clientY < midY) return el;
+  }
+  return null;
+}
+
+function handleZoneDragOver(e) {
+  e.preventDefault(); // ★これがないとdropできない
+  if (!draggedElement) return;
+
+  const zone = e.currentTarget; // left or mid
+  const before = getBeforeElementInZone(zone, e.clientY, draggedElement);
+
+  if (before) zone.insertBefore(draggedElement, before);
+  else zone.appendChild(draggedElement);
+}
+
+function handleZoneDrop(e) {
+  e.preventDefault();
+}
+
+function enableDnDForZones() {
+  const left = document.getElementById("stripContainerLeft");
+  const mid  = document.getElementById("stripContainerMid");
+  if (!left || !mid) return;
+
+  [left, mid].forEach(zone => {
+    zone.addEventListener("dragover", handleZoneDragOver);
+    zone.addEventListener("drop", handleZoneDrop);
+  });
+}
+
+
 
 async function updateMixedOrderTwoCols() {
   const left = document.getElementById("stripContainerLeft");
@@ -544,7 +587,6 @@ async function updateMixedOrderTwoCols() {
     });
 
     const text = await res.text();
-    console.log("✅ save response:", res.status, text);
 
     if (!res.ok) throw new Error(`save failed: ${res.status}`);
   } catch (e) {
@@ -675,7 +717,39 @@ function handleDragEnd() {
   this.classList.remove("dragging");
   draggedElement = null; // ドラッグ要素をリセット
 
-  updateMixedOrder();
+  // updateMixedOrder();
+  updateMixedOrderTwoCols();
+}
+
+function getWind() {
+  const dir = Number(document.getElementById("windDir").value);
+  const spd = Number(document.getElementById("windSpd").value);
+  return { dir, spd };
+}
+
+// 例：確認
+document.getElementById("windDir").addEventListener("change", () => {
+  console.log("wind:", getWind());
+});
+
+function initWindPersistence() {
+  const dirEl = document.getElementById("windDir");
+  const spdEl = document.getElementById("windSpd");
+  if (!dirEl || !spdEl) return; // 右カラムが無いページでも落ちない
+
+  // 復元（保存があれば上書き）
+  const savedDir = localStorage.getItem("windDir");
+  const savedSpd = localStorage.getItem("windSpd");
+  if (savedDir !== null) dirEl.value = savedDir;
+  if (savedSpd !== null) spdEl.value = savedSpd;
+
+  // 保存（変更のたびに保存）
+  const save = () => {
+    localStorage.setItem("windDir", dirEl.value);
+    localStorage.setItem("windSpd", spdEl.value);
+  };
+  dirEl.addEventListener("input", save);
+  spdEl.addEventListener("input", save);
 }
 
 function updateHiddenStripCounts() {
