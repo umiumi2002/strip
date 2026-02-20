@@ -1,7 +1,7 @@
 UserActivation = "use strict";
 
 /** ====== 設定（URLだけまとめ） ====== */
-const BASE_URL = "https://strip-1-fv9b.onrender.com";
+const BASE_URL = "https://strip-ver3.onrender.com";
 
 var request = new XMLHttpRequest();
 request.open("GET", BASE_URL, true);
@@ -51,6 +51,7 @@ function initializeStrips() {
 
       // コンテナ単位のD&Dを有効化（dep内/arr内の並び替え）
       enableDnDForContainers();
+      restoreIssuedState(data);
     })
     .catch((error) => console.error("データの取得エラー:", error));
 }
@@ -240,9 +241,10 @@ let draggedElement = null;
 function enableDnDForContainers() {
   const dep = document.getElementById("takeoffStripContainer");
   const arr = document.getElementById("landingStripContainer");
-  if (!dep || !arr) return;
+  const mid = document.getElementById("stripContainerMid");
+  if (!dep || !arr || !mid) return;
 
-  [dep, arr].forEach((zone) => {
+  [dep, arr, mid].forEach((zone) => {
     zone.addEventListener("dragover", handleZoneDragOver);
     zone.addEventListener("drop", handleZoneDrop);
   });
@@ -287,6 +289,12 @@ function handleZoneDragOver(e) {
 
 function handleZoneDrop(e) {
   e.preventDefault();
+  const zone = e.currentTarget;
+
+  // midに落としたら発出済状態を保存
+  if (zone && zone.id === "stripContainerMid") {
+    saveIssuedState();
+  }
 }
 
 /** ====== Touch D&D（コンテナ内並び替え専用） ====== */
@@ -350,22 +358,25 @@ function updateOrder(containerId, type) {
   if (!container) return;
 
   const newOrder = Array.from(container.querySelectorAll(".strip"))
-    .map((el) => parseInt(el.dataset.id, 10))
-    .filter((id) => Number.isFinite(id));
+    .map((el) => el.dataset.id)
+    .filter((id) => id !== null && id !== "")
 
-  console.log(`New order for ${type}s:`, newOrder);
+  console.log(`New order for ${type}:`, newOrder);
 
   fetch(`${BASE_URL}/update_order`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      type: type, // "departure" or "arrival"
-      order: newOrder,
+      type: type, order: newOrder,
     }),
   })
-    .then((response) => {
-      if (!response.ok) throw new Error("Network response was not ok");
-      return response.json().catch(() => ({}));
+    .then(async (res) => {
+    const text = await res.text(); // ← 重要：本文を取る
+    console.log("update_order status:", res.status);
+    console.log("update_order body:", text);
+
+    if (!res.ok) throw new Error(text || "Network response was not ok");
+    try { return JSON.parse(text); } catch (e) { return {}; }
     })
     .then((data) => console.log(`Order updated on server for ${type}s:`, data))
     .catch((error) =>
@@ -437,4 +448,49 @@ function updateHiddenStripCounts() {
         );
     })
     .catch((error) => console.error("全ストリップ情報の取得エラー:", error));
+}
+
+function saveIssuedState() {
+  const mid = document.getElementById("stripContainerMid");
+  if (!mid) return;
+
+  const order = Array.from(mid.querySelectorAll(".strip")).map((el) => ({
+    id: parseInt(el.dataset.id, 10),
+    type: el.dataset.type,   // "departure" or "arrival"
+    lane: "mid",
+  }));
+
+  fetch(`${BASE_URL}/update_order_mixed`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ order }),
+  })
+    .then(async (res) => {
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || "update_order_mixed failed");
+      return text;
+    })
+    .then((text) => console.log("✅ issued saved:", text))
+    .catch((err) => console.error("❌ issued save error:", err));
+}
+
+function restoreIssuedState(data) {
+  const mid = document.getElementById("stripContainerMid");
+  if (!mid) return;
+
+  const mixed = Array.isArray(data?.mixed_order) ? data.mixed_order : [];
+  const issued = mixed.filter((x) => x && x.lane === "mid");
+
+  if (issued.length === 0) return;
+  // ★ type:id で一意にする
+  const keyOfEl = (el) => `${el.dataset.type}:${el.dataset.id}`;
+  const all = new Map(
+    Array.from(document.querySelectorAll(".strip")).map((el) => [keyOfEl(el), el])
+  );
+
+  issued.forEach((item) => {
+    const key = `${item.type}:${item.id}`;
+    const el = all.get(key);
+    if (el) mid.appendChild(el);
+  });
 }

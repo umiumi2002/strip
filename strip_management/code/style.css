@@ -1,28 +1,32 @@
- /* 画面全体に対してピッタリ2分割 */
- .main {
-   display: flex;
-   height: 100%;
+/* 画面いっぱいにする基本セット */
+html, body {
+  height: 100%;
+  margin: 0;          /* ←デフォの余白を消す */
+  padding: 0;
+}
 
+body {
+  background: #000;   /* 余白が白く見えるの防止（任意） */
+}
 
- }
+/* main を viewport 全体に */
+.main {
+  width: 100vw;
+  min-height: 100vh;  /* ←高さを画面に合わせて確保 */
+  display: flex;
+  align-items: stretch;  /* 子カラムを縦に伸ばす */
+}
 
  .container.single-column {
    flex: 1;
    /* display: flex; */
    width: 100%;
-   height: 100vh;
+   /* height: 100vh; */
    box-sizing: border-box;
    background-color: black;
    /* 画面全体に対してピッタリ3分割 */
    flex-direction: column;
-
- }
-
-
- .stripContainer {
-   min-height: 80vh;
-   /* めちゃ重要 */
- }
+}
 
  .strip {
    display: flex;
@@ -174,9 +178,27 @@
  }
 
  .header-block div {
-   display: flex;
-   align-items: center;
+  display: flex;
+  align-items: center;
  }  
+
+ .header-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.header-left{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hidden-count{
+  margin: 0;          /* pのデフォルト余白を消す */
+  white-space: nowrap; /* 折り返し防止 */
+}
 
  p {
    color: white;
@@ -198,9 +220,6 @@
    /* background-color: rgba(12, 184, 9, 0.879); */
 
  }
-
-
-
  .hidden {
    display: none;
  }
@@ -216,16 +235,16 @@
    color: white;
    /* height: 100%; */
    min-height: 0;
-   display: flex;
- }
+   display: flex; }
 
  .wind-stack {
    height: 100%;
    width: 100%;
    display: flex;
    /* flex-direction: column; */
-   /* justify-content: space-between; */
-   /* gap: 30px; */
+   justify-content: space-between;
+   gap: 30px;
+   padding: 0 30px;
  }
 
  /* 1項目（DIR / SPD） */
@@ -244,10 +263,10 @@
  }
 
  .wind-ring {
-  width: 180px;     /* ← 固定値にする */
-  height: 180px;    /* ← 固定 */
+  width: 150px;     /* ← 固定値にする */
+  height: 150px;    /* ← 固定 */
   aspect-ratio: unset;  /* 不要になる */
-  border: 10px solid red;
+  border: 5px solid red;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -278,6 +297,33 @@
    margin: 0;
  }
 
+
+
+/* departure / arrival の「ストリップが並ぶ置き場」だけ対象にする */
+#takeoffStripContainer,
+#landingStripContainer {
+  /* 両端の水色ライン */
+  border-left: 10px solid #7BA3DD;
+  border-right: 10px solid #7BA3DD;
+  box-sizing: border-box;
+  height: 100%;
+}
+
+/* もし中のストリップが勝手に100%になる指定があるなら抑える */
+#takeoffStripContainer .strip,
+#landingStripContainer .strip {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+ .stripContainer {
+   min-height: 80vh;
+   /* めちゃ重要 */
+ }
+
+ #stripContainerMid {
+  min-height: 200px;
+}
 
 
  /* タブレットの画面幅に応じてレスポンシブ対応 */
