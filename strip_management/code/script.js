@@ -399,15 +399,36 @@ function initWindPersistence() {
   const spdEl = document.getElementById("windSpd");
   if (!dirEl || !spdEl) return;
 
-  const savedDir = localStorage.getItem("windDir");
-  const savedSpd = localStorage.getItem("windSpd");
-  if (savedDir !== null) dirEl.value = savedDir;
-  if (savedSpd !== null) spdEl.value = savedSpd;
+  // const savedDir = localStorage.getItem("windDir");
+  // const savedSpd = localStorage.getItem("windSpd");
+  // if (savedDir !== null) dirEl.value = savedDir;
+  // if (savedSpd !== null) spdEl.value = savedSpd;
+    // ← サーバから取得に変更
+  fetch(`${BASE_URL}/get_wind`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.dir !== undefined) dirEl.value = data.dir;
+      if (data.spd !== undefined) spdEl.value = data.spd;
+    })
+    .catch(() => {
+      // サーバ失敗時はlocalStorageにフォールバック
+      const savedDir = localStorage.getItem("windDir");
+      const savedSpd = localStorage.getItem("windSpd");
+      if (savedDir !== null) dirEl.value = savedDir;
+      if (savedSpd !== null) spdEl.value = savedSpd;
+    });
 
   const save = () => {
     localStorage.setItem("windDir", dirEl.value);
     localStorage.setItem("windSpd", spdEl.value);
+        fetch(`${BASE_URL}/update_wind`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ dir: dirEl.value, spd: spdEl.value }),
+    });
   };
+
+
   dirEl.addEventListener("input", save);
   spdEl.addEventListener("input", save);
 
