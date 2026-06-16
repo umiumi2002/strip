@@ -303,7 +303,7 @@ let touchDragging = false;
 function getZoneFromPoint(x, y) {
   const el = document.elementFromPoint(x, y);
   if (!el) return null;
-  return el.closest("#takeoffStripContainer, #landingStripContainer");
+  return el.closest("#takeoffStripContainer, #landingStripContainer, #stripContainerMid");
 }
 
 function handleTouchStart(event) {
@@ -336,6 +336,10 @@ function handleTouchEnd() {
   touchStartElement.classList.remove("dragging");
   touchStartElement = null;
   touchDragging = false;
+
+  if (parent && parent.id === "stripContainerMid") {
+    saveIssuedState();
+  }
 
   saveOrderForContainer(parent);
 }
