@@ -363,6 +363,19 @@ def update_arrivals():
         # arrivalsデータが含まれていない場合のエラーハンドリング
         return jsonify({'status': 'error', 'message': 'No arrivals data provided'}), 400
 
+wind_data = {"dir": 270, "spd": 12}  # デフォルト値
+
+@app.route('/get_wind', methods=['GET'])
+def get_wind():
+    return jsonify(wind_data)
+
+@app.route('/update_wind', methods=['POST'])
+def update_wind():
+    global wind_data
+    data = request.get_json()
+    wind_data["dir"] = data.get("dir", wind_data["dir"])
+    wind_data["spd"] = data.get("spd", wind_data["spd"])
+    return jsonify({"ok": True, "wind": wind_data})
 
 if __name__ == "__main__":
     app.run(debug=True)
