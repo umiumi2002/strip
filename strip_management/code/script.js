@@ -19,9 +19,9 @@ request.onload = function () {
 request.send();
 
 // 10秒ごとに画面をリロード（現状運用を踏襲）
-// setInterval(function () {
-//   location.reload();
-// }, 10000);
+setInterval(function () {
+  location.reload();
+}, 10000);
 
 /** ====== 初期描画：dep/arrを別コンテナに表示 ====== */
 function initializeStrips() {
@@ -30,7 +30,6 @@ function initializeStrips() {
     .then((data) => {
       const depContainer = document.getElementById("takeoffStripContainer");
       const arrContainer = document.getElementById("landingStripContainer");
-
       if (!depContainer || !arrContainer) {
         console.warn("containers not found");
         return;

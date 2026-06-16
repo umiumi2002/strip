@@ -15,30 +15,36 @@ body {
   min-height: 100vh;  /* ←高さを画面に合わせて確保 */
   display: flex;
   align-items: stretch;  /* 子カラムを縦に伸ばす */
+  flex-direction: row; /* 縦並びにする */
+
 }
 
  .container.single-column {
-   flex: 1;
-   /* display: flex; */
-   width: 100%;
+   /* flex: 2; */
+  min-width: 0;
    /* height: 100vh; */
    box-sizing: border-box;
    background-color: black;
    /* 画面全体に対してピッタリ3分割 */
    flex-direction: column;
 }
+.container.single-column.right-column {
+  /* flex: 2; */
+  min-width: 0;
+}
 
- .strip {
+.strip {
    display: flex;
-   justify-content: space-between;
+   justify-content: flex-start;
    align-items: center;
    padding: 5px;
    margin: 10px 0;
    /* background-color: #f0f0f0; */
    color: white;
    border: 1px solid #ccc;
+   gap: 10px;
 
- }
+}
 
  .strip-row-bottom {
    display: flex;
@@ -243,15 +249,8 @@ body {
    display: flex;
    /* flex-direction: column; */
    justify-content: space-between;
-   gap: 30px;
-   padding: 0 30px;
- }
-
- /* 1項目（DIR / SPD） */
- .wind-item {
-   /* display: flex; */
-   /* align-items: center; */
-   /* gap: 30px; */
+   gap: 10px;
+   padding: 0 10px;
  }
 
  /* 左のラベル */
@@ -263,9 +262,9 @@ body {
  }
 
  .wind-ring {
-  width: 150px;     /* ← 固定値にする */
-  height: 150px;    /* ← 固定 */
-  aspect-ratio: unset;  /* 不要になる */
+  width: min(150px, 80%);
+  height: auto;
+  aspect-ratio: 1 / 1;
   border: 5px solid red;
   border-radius: 50%;
   display: grid;
