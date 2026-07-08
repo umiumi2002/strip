@@ -205,10 +205,41 @@ def add_strip():
         if strip['id'] == airplane_id:
             return jsonify({"error": "Airplane with the same ID already exists"}), 400
 
+    # TAKE OFF / LINE UP / LAND のステータス（未設定はNone）
+    strip_data.setdefault("runway_status", None)
 
     # 新しいストリップを追加
     strips_data[airplane_type + 's'].append(strip_data)
     return jsonify({"status": "success"})
+
+
+# TAKE OFF / LINE UP / LAND ボタンでストリップにステータスを付ける
+RUNWAY_STATUSES = ("takeoff", "lineup", "land", "goaround")
+
+@app.route('/update_runway_status', methods=['POST'])
+def update_runway_status():
+    data = request.get_json(silent=True) or {}
+    airplane_id = data.get('id')
+    airplane_type = data.get('type')
+    status = data.get('status')
+
+    if airplane_type not in ("arrival", "departure"):
+        return jsonify({"error": "Invalid airplane type"}), 400
+    if status is not None and status not in RUNWAY_STATUSES:
+        return jsonify({"error": "Invalid status"}), 400
+
+    try:
+        airplane_id = int(airplane_id)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid airplane id"}), 400
+
+    target_list = strips_data[airplane_type + 's']
+    for strip in target_list:
+        if strip['id'] == airplane_id:
+            strip['runway_status'] = status
+            return jsonify({"status": "success", "updated_strip": strip}), 200
+
+    return jsonify({"error": "Strip not found"}), 404
     
 
 
@@ -262,6 +293,16 @@ def get_strips():
 
 
 
+
+# ドラッグ＆ドロップで移動できるゾーン（フロントのコンテナIDとそのまま対応）
+ALLOWED_LANES = (
+    "takeoffStripContainer",
+    "landingStripContainer",
+    "combinedStripContainer",
+    "runwayOccupancyContainer",
+    "stripContainerMid",
+)
+
 @app.route('/update_order_mixed', methods=['POST'])
 def update_order_mixed():
     global mixed_order
@@ -288,10 +329,20 @@ def update_order_mixed():
         if _type not in ("departure", "arrival"):
             continue
         lane = item.get("lane")
-        if lane not in ("left", "mid"):
-            lane = "left"  # デフォルト
+        if lane not in ALLOWED_LANES:
+            continue  # 未知のゾーンは無視する
 
-        cleaned.append({"id": _id, "type": _type,"lane": lane})
+        cleaned_item = {"id": _id, "type": _type, "lane": lane}
+
+        # ハンドオフ済みエリアに入った時刻（自動削除の起点として使う）
+        entered_at = item.get("enteredAt")
+        if entered_at is not None:
+            try:
+                cleaned_item["enteredAt"] = int(entered_at)
+            except (TypeError, ValueError):
+                pass
+
+        cleaned.append(cleaned_item)
 
     mixed_order = cleaned
     return jsonify({"ok": True, "saved_count": len(mixed_order), "mixed_order": mixed_order})
@@ -363,7 +414,7 @@ def update_arrivals():
         # arrivalsデータが含まれていない場合のエラーハンドリング
         return jsonify({'status': 'error', 'message': 'No arrivals data provided'}), 400
 
-wind_data = {"dir": 270, "spd": 12}  # デフォルト値
+wind_data = {"dir": 270, "spd": 12, "dir2": 270, "spd2": 12}  # デフォルト値（2局分）
 
 @app.route('/get_wind', methods=['GET'])
 def get_wind():
@@ -373,8 +424,8 @@ def get_wind():
 def update_wind():
     global wind_data
     data = request.get_json()
-    wind_data["dir"] = data.get("dir", wind_data["dir"])
-    wind_data["spd"] = data.get("spd", wind_data["spd"])
+    for key in ("dir", "spd", "dir2", "spd2"):
+        wind_data[key] = data.get(key, wind_data[key])
     return jsonify({"ok": True, "wind": wind_data})
 
 if __name__ == "__main__":

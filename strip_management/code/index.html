@@ -9,61 +9,28 @@
   </head>
 
   <body>
-    <!-- <h1>フライトストリップ管理</h1> -->
-
-    <!-- <div class="container">
-      <div id="leftPanel">
-        <div class="header" draggable="false">
-          <h2>departure</h2>
-          <p class="hidden-count" id = takeoffHiddenCount>非表示ストリップ:   枚</p>
-          <button type="button" onclick="addStrip('takeoffStripContainer')">
-            add strip
-          </button>
-        </div>
-        <div id="takeoffStripContainer" class="leftPanel"></div>
-      </div>
-      <div id="rightPanel">
-        <div class="header">
-        <h2>arrive</h2>
-        <p class="hidden-count" id = landingHiddenCount>非表示ストリップ:   枚</p>
-        <button type="button" onclick="addStrip('landingStripContainer')" id="addArrivalStripButton">
-          add strip
-        </button>
-        </div>
-        <div id="landingStripContainer"></div>
-      </div>
-    </div> -->
     <div class="main">
-      <div class="container single-column">
-        <div class="header header-mixed" draggable="false">
-          <div class="header-block dep">
-            <div class="header-row">
-              <div class="header-left">
-                <p>departure</p>
-                <button
-                  type="button"
-                  onclick="addStrip('takeoffStripContainer')"
-                >
-                  add strip
-                </button>
-              </div>
-
-              <p class="hidden-count" id="takeoffHiddenCount">
-                非表示ストリップ: 枚
-              </p>
-            </div>
+      <!-- ①左：出発/到着まとめて置く場所 ＋ 滑走路占有 -->
+      <div class="container single-column col-organize">
+        <div class="column-section">
+          <div class="header header-mixed" draggable="false">
+            <p>STRIP</p>
           </div>
+          <div id="combinedStripContainer" class="stripContainer half"></div>
         </div>
 
-        <!-- ★ここに混在表示 -->
-        <div id="takeoffStripContainer" class="stripContainer"></div>
+        <div class="column-section runway-occupancy">
+          <div class="header header-mixed" draggable="false">
+            <p>滑走路占有</p>
+          </div>
+          <div id="runwayOccupancyContainer" class="stripContainer half"></div>
+        </div>
       </div>
 
-      <!-- 右：上 Wind / 下 発出済 -->
+      <!-- ②中央：Wind（2セット）＋ 発出済エリア -->
       <div class="container single-column right-column">
-        <!-- Wind -->
         <div class="header header-mixed" draggable="false">
-          <p style="color: white; margin: 0">Wind</p>
+          <p>Wind</p>
         </div>
 
         <div class="wind-panel">
@@ -88,38 +55,105 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- 発出済 -->
-        <div class="header header-mixed" draggable="false">
-          <p style="color: white; margin: 0">発出済エリア</p>
-        </div>
-
-        <!-- 既存IDをそのまま発出済の箱に使う -->
-        <div id="stripContainerMid" class="stripContainer"></div>
-      </div>
-      <div class="container single-column">
-        <div class="header header-mixed" draggable="false">
-          <div class="header-block arr">
-             <div class="header-row">
-              <div class="header-left">
-                <p>arrival</p>
-                <button
-                  type="button"
-                  onclick="addStrip('landingStripContainer')"
-                >
-                  add strip
-                </button>
+          <div class="wind-stack">
+            <div class="wind-item">
+              <div class="wind-label">DIR</div>
+              <div class="wind-ring">
+                <input
+                  id="windDir2"
+                  type="number"
+                  value="270"
+                  min="0"
+                  max="360"
+                />
               </div>
-              <p class="hidden-count" id="landingHiddenCount">
-                非表示ストリップ: 枚
-              </p>
+            </div>
+
+            <div class="wind-item">
+              <div class="wind-label">SPD</div>
+              <div class="wind-ring">
+                <input id="windSpd2" type="number" value="12" min="0" max="99" />
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- ★中央の置き場 -->
-        <div id="landingStripContainer" class="stripContainer"></div>
+        <div class="header header-mixed" draggable="false">
+          <p style="color: white; margin: 0">ハンドオフ済みエリア</p>
+        </div>
+
+        <div id="stripContainerMid" class="stripContainer"></div>
+      </div>
+
+      <!-- ③右：到着/出発の add strip 置き場 -->
+      <div class="container single-column col-inbox">
+        <div class="column-section">
+          <div class="header header-mixed" draggable="false">
+            <div class="header-block arr">
+              <div class="header-row">
+                <div class="header-left">
+                  <p>arrival</p>
+                  <button
+                    type="button"
+                    onclick="addStrip('landingStripContainer')"
+                  >
+                    add strip
+                  </button>
+                </div>
+                <p class="hidden-count" id="landingHiddenCount">
+                  非表示ストリップ: 枚
+                </p>
+              </div>
+            </div>
+          </div>
+          <div id="landingStripContainer" class="stripContainer half"></div>
+        </div>
+
+        <div class="column-section">
+          <div class="header header-mixed" draggable="false">
+            <div class="header-block dep">
+              <div class="header-row">
+                <div class="header-left">
+                  <p>departure</p>
+                  <button
+                    type="button"
+                    onclick="addStrip('takeoffStripContainer')"
+                  >
+                    add strip
+                  </button>
+                </div>
+                <p class="hidden-count" id="takeoffHiddenCount">
+                  非表示ストリップ: 枚
+                </p>
+              </div>
+            </div>
+          </div>
+          <div id="takeoffStripContainer" class="stripContainer half"></div>
+        </div>
+      </div>
+
+      <!-- ④一番右：TAKE OFF / LINE UP / LAND / GO AROUND ボタン -->
+      <!-- 使い方：ボタンを押して選択 → ストリップを押すとそのステータスが付く/取れる -->
+      <!-- （同じボタンを選び直してストリップを押すと解除） -->
+      <div class="container col-bays">
+        <button type="button" class="bay-button" data-status="takeoff">
+          TAKE OFF
+        </button>
+        <button type="button" class="bay-button" data-status="lineup">
+          LINE UP
+        </button>
+        <button type="button" class="bay-button" data-status="land">
+          LAND
+        </button>
+        <button type="button" class="bay-button" data-status="goaround">
+          GO AROUND
+        </button>
+        <!--
+        <button type="button" class="bay-button" data-status="cancel">
+          CANCEL
+        </button>
+        -->
       </div>
     </div>
 
