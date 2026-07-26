@@ -1,7 +1,7 @@
 UserActivation = "use strict";
 
 /** ====== 設定（URLだけまとめ） ====== */
-const BASE_URL = "https://umiumi2002.github.io/strip/";
+const BASE_URL = "https://umiumi2002.github.io/strip";
 
 var request = new XMLHttpRequest();
 request.open("GET", BASE_URL, true);
