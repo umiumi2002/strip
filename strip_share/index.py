@@ -63,9 +63,9 @@ flightStrip.departures.append(Airplane(12,"dep12","B738/M","34R",1816))  # MY031
 flightStrip.departures.append(Airplane(3,"dep3","B763/H","34R",1819))    # MY03159
 flightStrip.departures.append(Airplane(6,"dep6","B763/H","34R",1820))    # MY03162
 flightStrip.departures.append(Airplane(4,"dep4","B78X/H","34R",1824))    # MY03141
-flightStrip.departures.append(Airplane(19,"dep19","B763/H","34R",1807))  # MY03214
+flightStrip.departures.append(Airplane(19,"dep19","B763/H","34R",1825))  # MY03214
 flightStrip.departures.append(Airplane(21,"dep21","B788/H","34R",1828))  # MY03232
-flightStrip.departures.append(Airplane(17,"dep17","B772/H","34R",1759))  # MY03211
+flightStrip.departures.append(Airplane(17,"dep17","B772/H","34R",1830))  # MY03211
 flightStrip.departures.append(Airplane(30,"dep30","B789/H","34R",1833))  # MY03272
 flightStrip.departures.append(Airplane(28,"dep28","B738/M","34R",1835))  # MY03256
 flightStrip.departures.append(Airplane(32,"dep32","B763/H","34R",1838))  # MY03283
