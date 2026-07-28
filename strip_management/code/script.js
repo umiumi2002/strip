@@ -118,8 +118,7 @@ function createStrip(data, type) {
         <span class="callsign bold">${name}</span>
         <div class="bottom-row">
           <span class="aircraft">${model}</span>
-          <span class="time">${time}</span>
-        </div>
+          <span class="time">${Number(time) > 0 ? time : ""}</span>        </div>
       </div>
       <div class="right-block">
         <span class="runway bold">${runway}</span>

@@ -51,40 +51,39 @@ flightStrip = FlightStrip()
 
 # シーン1のデータを追加
 # ===== DEPARTURES (C滑走路, 指定順) =====
-flightStrip.departures.append(Airplane(7,"dep7","B763/H","34R",1755))    # MY03122
-flightStrip.departures.append(Airplane(1,"dep1","A359/H","34R",1759))    # MY03119
-flightStrip.departures.append(Airplane(10,"dep10","E190/M","34R",1801))  # MY03128
-flightStrip.departures.append(Airplane(8,"dep8","B738/M","34R",1806))    # MY03125
-flightStrip.departures.append(Airplane(11,"dep11","A339/H","34R",1808))  # MY03103
-flightStrip.departures.append(Airplane(13,"dep13","B788/H","34R",1810))  # MY03124
-flightStrip.departures.append(Airplane(2,"dep2","B738/M","34R",1813))    # MY03157
-flightStrip.departures.append(Airplane(5,"dep5","B737/M","34R",1814))    # MY03173
-flightStrip.departures.append(Airplane(12,"dep12","B738/M","34R",1816))  # MY03164
-flightStrip.departures.append(Airplane(3,"dep3","B763/H","34R",1819))    # MY03159
-flightStrip.departures.append(Airplane(6,"dep6","B763/H","34R",1820))    # MY03162
-flightStrip.departures.append(Airplane(4,"dep4","B78X/H","34R",1824))    # MY03141
-flightStrip.departures.append(Airplane(19,"dep19","B763/H","34R",1825))  # MY03214
-flightStrip.departures.append(Airplane(21,"dep21","B788/H","34R",1828))  # MY03232
-flightStrip.departures.append(Airplane(17,"dep17","B772/H","34R",1830))  # MY03211
-flightStrip.departures.append(Airplane(30,"dep30","B789/H","34R",1833))  # MY03272
-flightStrip.departures.append(Airplane(28,"dep28","B738/M","34R",1835))  # MY03256
-flightStrip.departures.append(Airplane(32,"dep32","B763/H","34R",1838))  # MY03283
-flightStrip.departures.append(Airplane(31,"dep31","B738/M","34R",1841))  # MY03277
-flightStrip.departures.append(Airplane(33,"dep33","B738/M","34R",1844))  # MY03289
+flightStrip.departures.append(Airplane(1,"dep1","A359/H","34R",-1))  # MY03119
+flightStrip.departures.append(Airplane(2,"dep2","B738/M","34R",-1))  # MY03157
+flightStrip.departures.append(Airplane(3,"dep3","B763/H","34R",-1))  # MY03159
+flightStrip.departures.append(Airplane(4,"dep4","B78X/H","34R",-1))  # MY03141
+flightStrip.departures.append(Airplane(5,"dep5","B737/M","34R",-1))  # MY03173
+flightStrip.departures.append(Airplane(6,"dep6","B763/H","34R",-1))  # MY03162
+flightStrip.departures.append(Airplane(7,"dep7","B763/H","34R",-1))  # MY03122
+flightStrip.departures.append(Airplane(8,"dep8","B738/M","34R",-1))  # MY03125
+flightStrip.departures.append(Airplane(10,"dep10","E190/M","34R",-1))  # MY03128
+flightStrip.departures.append(Airplane(11,"dep11","A339/H","34R",-1))  # MY03103
+flightStrip.departures.append(Airplane(12,"dep12","B738/M","34R",-1))  # MY03164
+flightStrip.departures.append(Airplane(13,"dep13","B788/H","34R",-1))  # MY03124
+flightStrip.departures.append(Airplane(17,"dep17","B772/H","34R",-1))  # MY03211
+flightStrip.departures.append(Airplane(19,"dep19","B763/H","34R",-1))  # MY03214
+flightStrip.departures.append(Airplane(21,"dep21","B788/H","34R",-1))  # MY03232
+flightStrip.departures.append(Airplane(28,"dep28","B738/M","34R",-1))  # MY03256
+flightStrip.departures.append(Airplane(30,"dep30","B789/H","34R",-1))  # MY03272
+flightStrip.departures.append(Airplane(31,"dep31","B738/M","34R",-1))  # MY03277
+flightStrip.departures.append(Airplane(32,"dep32","B763/H","34R",-1))  # MY03283
+flightStrip.departures.append(Airplane(33,"dep33","B738/M","34R",-1))  # MY03289
 
-# ===== ARRIVALS (C滑走路, 指定順) =====
-flightStrip.arrivals.append(Airplane(2,"arr2","B763/H","34R",1757))    # MY02819
-flightStrip.arrivals.append(Airplane(4,"arr4","B788/H","34R",1800))    # MY02866
-flightStrip.arrivals.append(Airplane(7,"arr7","B738/M","34R",1804))    # MY03017
-flightStrip.arrivals.append(Airplane(10,"arr10","B789/H","34R",1807))  # MY02407
-flightStrip.arrivals.append(Airplane(12,"arr12","B763/H","34R",1811))  # MY02953
-flightStrip.arrivals.append(Airplane(16,"arr16","B788/H","34R",1817))  # MY02722
-flightStrip.arrivals.append(Airplane(20,"arr20","E190/M","34R",1821))  # MY03003
-flightStrip.arrivals.append(Airplane(23,"arr23","B738/M","34R",1826))  # MY03148
-flightStrip.arrivals.append(Airplane(26,"arr26","B788/H","34R",1831))  # MY02999
-flightStrip.arrivals.append(Airplane(29,"arr29","B738/M","34R",1836))  # MY03031
+flightStrip.arrivals.append(Airplane(2,"arr2","B763/H","34R",1755))  # MY02819
+flightStrip.arrivals.append(Airplane(4,"arr4","B788/H","34R",1800))  # MY02866
+flightStrip.arrivals.append(Airplane(7,"arr7","B738/M","34R",1805))  # MY03017
+flightStrip.arrivals.append(Airplane(10,"arr10","B789/H","34R",1805))  # MY02407
+flightStrip.arrivals.append(Airplane(12,"arr12","B763/H","34R",1810))  # MY02953
+flightStrip.arrivals.append(Airplane(16,"arr16","B788/H","34R",1815))  # MY02722
+flightStrip.arrivals.append(Airplane(20,"arr20","E190/M","34R",1820))  # MY03003
+flightStrip.arrivals.append(Airplane(23,"arr23","B738/M","34R",1825))  # MY03148
+flightStrip.arrivals.append(Airplane(26,"arr26","B788/H","34R",1830))  # MY02999
+flightStrip.arrivals.append(Airplane(29,"arr29","B738/M","34R",1835))  # MY03031
 flightStrip.arrivals.append(Airplane(32,"arr32","A359/H","34R",1840))  # MY03045
-flightStrip.arrivals.append(Airplane(34,"arr34","B789/H","34R",1842))  # MY02542
+flightStrip.arrivals.append(Airplane(34,"arr34","B789/H","34R",1840))  # MY02542
 
 
 # シーン2のデータを追加
