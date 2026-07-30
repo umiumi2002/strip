@@ -1,4 +1,4 @@
-UserActivation = "use strict";
+"use strict";
 
 /** ====== 設定（URLだけまとめ） ====== */
 const BASE_URL = "https://strip-4.onrender.com";
@@ -58,7 +58,7 @@ function initializeStrips() {
     .catch((error) => console.error("データの取得エラー:", error));
 }
 
-/** ====== add strip（既存ロジックを維持） ====== */
+/** ====== add strip（IDベースで「まだ表示していない便」を1枚出す） ====== */
 async function addStrip(containerId) {
   console.log("✅ addStrip called! containerId =", containerId);
 
@@ -66,31 +66,30 @@ async function addStrip(containerId) {
     .then((response) => response.json())
     .then((data) => data);
 
-  if (
-    containerId === "takeoffStripContainer" &&
-    (openData.departures?.length || 0) < (flightdata.departures?.length || 0)
-  ) {
-    const stripData = flightdata.departures[openData.departures.length];
-    console.log("🚀 Adding departure strip:", stripData);
+  if (containerId === "takeoffStripContainer") {
+    // すでに表示中のIDを集めて、flightdataの先頭から未表示の便を探す
+    const openIds = new Set((openData.departures || []).map((s) => s.id));
+    const next = (flightdata.departures || []).find((s) => !openIds.has(s.id));
+    if (!next) return;
 
-    fetch(`${BASE_URL}/add_strip`, {
+    console.log("🚀 Adding departure strip:", next);
+    await fetch(`${BASE_URL}/add_strip`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "departure", strip_data: stripData }),
+      body: JSON.stringify({ type: "departure", strip_data: next }),
     });
 
     location.reload();
-  } else if (
-    containerId === "landingStripContainer" &&
-    (openData.arrivals?.length || 0) < (flightdata.arrivals?.length || 0)
-  ) {
-    const stripData = flightdata.arrivals[openData.arrivals.length];
-    console.log("🚀 Adding arrival strip:", stripData);
+  } else if (containerId === "landingStripContainer") {
+    const openIds = new Set((openData.arrivals || []).map((s) => s.id));
+    const next = (flightdata.arrivals || []).find((s) => !openIds.has(s.id));
+    if (!next) return;
 
-    fetch(`${BASE_URL}/add_strip`, {
+    console.log("🚀 Adding arrival strip:", next);
+    await fetch(`${BASE_URL}/add_strip`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "arrival", strip_data: stripData }),
+      body: JSON.stringify({ type: "arrival", strip_data: next }),
     });
 
     location.reload();
@@ -118,7 +117,8 @@ function createStrip(data, type) {
         <span class="callsign bold">${name}</span>
         <div class="bottom-row">
           <span class="aircraft">${model}</span>
-          <span class="time">${Number(time) > 0 ? time : ""}</span>        </div>
+          <span class="time">${Number(time) > 0 ? time : ""}</span>
+        </div>
       </div>
       <div class="right-block">
         <span class="runway bold">${runway}</span>
@@ -153,7 +153,8 @@ function createStrip(data, type) {
   strip.addEventListener("touchmove", handleTouchMove, { passive: false });
   strip.addEventListener("touchend", handleTouchEnd);
 
-  // TAKE OFF / LINE UP / LAND / GO AROUND / CANCEL ボタンを選択中に押すと、このストリップにステータスが付く/取れる
+  // TAKE OFF / LINE UP / LAND / GO AROUND / CANCEL ボタンを選択中に押すと、
+  // このストリップにステータスが付く/取れる
   strip.addEventListener("click", async (e) => {
     if (e.target.closest("button")) return;
     if (!selectedRunwayStatus) return;
@@ -168,8 +169,8 @@ function createStrip(data, type) {
       await applyRunwayStatus(strip, alreadyGoAround ? null : "goaround");
 
       if (!alreadyGoAround) {
-        // 緊急ボタンと同じ処理（到着キューに新しい便を追加）
-        await addEmergencyStripToArrivals();
+        // ゴーアラウンドした機体と同じ便名で、着陸予定を20分後にして到着キューへ再投入
+        await addGoAroundArrival(strip);
       }
       initializeStrips();
       updateHiddenStripCounts();
@@ -255,7 +256,7 @@ function createStrip(data, type) {
 /** ====== TAKE OFF / LINE UP / LAND / GO AROUND ステータス ======
  * 使い方：右端のボタンを押して選択 → ストリップを押すとそのステータスが付く
  * （同じボタン選択中に付与済みのストリップを押すと解除。CANCELは常に解除）
- * GO AROUNDのみ、付与時に緊急ボタンと同じ処理（到着キューへの追加）も行う
+ * GO AROUNDのみ、付与時に「同じ便名で20分後の到着ストリップ」を追加する
  */
 const RUNWAY_STATUS_LABELS = {
   takeoff: "TAKE OFF",
@@ -332,6 +333,26 @@ async function addEmergencyStripToArrivals() {
     if (!res.ok) throw new Error(`update_emergency failed: ${res.status}`);
   } catch (error) {
     console.error("Error:", error);
+  }
+}
+
+/** ====== ゴーアラウンド：同じ便名で20分後の到着ストリップを追加 ====== */
+async function addGoAroundArrival(strip) {
+  const id = parseInt(strip.dataset.id, 10);
+  try {
+    const res = await fetch(`${BASE_URL}/goaround`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+
+    const text = await res.text();
+    console.log("goaround status:", res.status);
+    console.log("goaround body:", text);
+
+    if (!res.ok) throw new Error(`goaround failed: ${res.status}`);
+  } catch (error) {
+    console.error("goaround error:", error);
   }
 }
 
@@ -660,7 +681,10 @@ function restoreIssuedState(data) {
   // ★ type:id で一意にする
   const keyOfEl = (el) => `${el.dataset.type}:${el.dataset.id}`;
   const all = new Map(
-    Array.from(document.querySelectorAll(".strip")).map((el) => [keyOfEl(el), el])
+    Array.from(document.querySelectorAll(".strip")).map((el) => [
+      keyOfEl(el),
+      el,
+    ])
   );
 
   mixed.forEach((item) => {

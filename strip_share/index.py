@@ -1,7 +1,7 @@
 # testtest
 
 
-from flask import Flask, jsonify,request
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -9,9 +9,10 @@ CORS(app)
 
 mixed_order = []
 
+
 # クラスの定義
 class Airplane:
-    def __init__(self,id,name,model,runway,time):
+    def __init__(self, id, name, model, runway, time):
         self.id = id
         self.name = name
         self.model = model  # モデル名
@@ -29,6 +30,7 @@ class Airplane:
             "is_completed": self.is_completed
         }
 
+
 class FlightStrip:
     def __init__(self):
         self.departures = []
@@ -37,7 +39,7 @@ class FlightStrip:
     def get_arrivals(self):
         """到着機のリストを取得する"""
         return [airplane.to_dict() for airplane in self.arrivals]
-    
+
     def add_arrival(self, airplane):
         """到着機を追加する"""
         self.arrivals.append(airplane)
@@ -50,72 +52,42 @@ class FlightStrip:
 flightStrip = FlightStrip()
 
 # シーン1のデータを追加
-# ===== DEPARTURES (C滑走路, 指定順) =====
 # ===== DEPARTURES (C滑走路, 離陸時刻順) =====
-flightStrip.departures.append(Airplane(7,"dep7","B763/H","34R",0))   # MY03122
-flightStrip.departures.append(Airplane(1,"dep1","A359/H","34R",0))   # MY03119
-flightStrip.departures.append(Airplane(10,"dep10","E190/M","34R",0)) # MY03128
-flightStrip.departures.append(Airplane(8,"dep8","B738/M","34R",0))   # MY03125
-flightStrip.departures.append(Airplane(11,"dep11","A339/H","34R",0)) # MY03103
-flightStrip.departures.append(Airplane(13,"dep13","B788/H","34R",0)) # MY03124
-flightStrip.departures.append(Airplane(2,"dep2","B738/M","34R",0))   # MY03157
-flightStrip.departures.append(Airplane(5,"dep5","B737/M","34R",0))   # MY03173
-flightStrip.departures.append(Airplane(12,"dep12","B738/M","34R",0)) # MY03164
-flightStrip.departures.append(Airplane(3,"dep3","B763/H","34R",0))   # MY03159
-flightStrip.departures.append(Airplane(6,"dep6","B763/H","34R",0))   # MY03162
-flightStrip.departures.append(Airplane(4,"dep4","B78X/H","34R",0))   # MY03141
-flightStrip.departures.append(Airplane(19,"dep19","B763/H","34R",0)) # MY03214
-flightStrip.departures.append(Airplane(21,"dep21","B788/H","34R",0)) # MY03232
-flightStrip.departures.append(Airplane(17,"dep17","B772/H","34R",0)) # MY03211
-flightStrip.departures.append(Airplane(30,"dep30","B789/H","34R",0)) # MY03272
-flightStrip.departures.append(Airplane(28,"dep28","B738/M","34R",0)) # MY03256
-flightStrip.departures.append(Airplane(32,"dep32","B763/H","34R",0)) # MY03283
-flightStrip.departures.append(Airplane(31,"dep31","B738/M","34R",0)) # MY03277
-flightStrip.departures.append(Airplane(33,"dep33","B738/M","34R",0)) # MY03289
+flightStrip.departures.append(Airplane(7, "dep7", "B763/H", "34R", 0))    # MY03122
+flightStrip.departures.append(Airplane(1, "dep1", "A359/H", "34R", 0))    # MY03119
+flightStrip.departures.append(Airplane(10, "dep10", "E190/M", "34R", 0))  # MY03128
+flightStrip.departures.append(Airplane(8, "dep8", "B738/M", "34R", 0))    # MY03125
+flightStrip.departures.append(Airplane(11, "dep11", "A339/H", "34R", 0))  # MY03103
+flightStrip.departures.append(Airplane(13, "dep13", "B788/H", "34R", 0))  # MY03124
+flightStrip.departures.append(Airplane(2, "dep2", "B738/M", "34R", 0))    # MY03157
+flightStrip.departures.append(Airplane(5, "dep5", "B737/M", "34R", 0))    # MY03173
+flightStrip.departures.append(Airplane(12, "dep12", "B738/M", "34R", 0))  # MY03164
+flightStrip.departures.append(Airplane(3, "dep3", "B763/H", "34R", 0))    # MY03159
+flightStrip.departures.append(Airplane(6, "dep6", "B763/H", "34R", 0))    # MY03162
+flightStrip.departures.append(Airplane(4, "dep4", "B78X/H", "34R", 0))    # MY03141
+flightStrip.departures.append(Airplane(19, "dep19", "B763/H", "34R", 0))  # MY03214
+flightStrip.departures.append(Airplane(21, "dep21", "B788/H", "34R", 0))  # MY03232
+flightStrip.departures.append(Airplane(17, "dep17", "B772/H", "34R", 0))  # MY03211
+flightStrip.departures.append(Airplane(30, "dep30", "B789/H", "34R", 0))  # MY03272
+flightStrip.departures.append(Airplane(28, "dep28", "B738/M", "34R", 0))  # MY03256
+flightStrip.departures.append(Airplane(32, "dep32", "B763/H", "34R", 0))  # MY03283
+flightStrip.departures.append(Airplane(31, "dep31", "B738/M", "34R", 0))  # MY03277
+flightStrip.departures.append(Airplane(33, "dep33", "B738/M", "34R", 0))  # MY03289
 
 # ===== ARRIVALS (C滑走路, 着陸時刻順) =====
-flightStrip.arrivals.append(Airplane(2,"arr2","B763/H","34R",1757))     # MY02819
-flightStrip.arrivals.append(Airplane(4,"arr4","B788/H","34R",1800))     # MY02866
-flightStrip.arrivals.append(Airplane(7,"arr7","B738/M","34R",1804))     # MY03017
-flightStrip.arrivals.append(Airplane(10,"arr10","B789/H","34R",1807))   # MY02407
-flightStrip.arrivals.append(Airplane(12,"arr12","B763/H","34R",1811))   # MY02953
-flightStrip.arrivals.append(Airplane(16,"arr16","B788/H","34R",1817))   # MY02722
-flightStrip.arrivals.append(Airplane(20,"arr20","E190/M","34R",1822))   # MY03003
-flightStrip.arrivals.append(Airplane(23,"arr23","B738/M","34R",1826))   # MY03148
-flightStrip.arrivals.append(Airplane(26,"arr26","B788/H","34R",1831))   # MY02999
-flightStrip.arrivals.append(Airplane(29,"arr29","B738/M","34R",1836))   # MY03031
-flightStrip.arrivals.append(Airplane(32,"arr32","A359/H","34R",1840))   # MY03045
-flightStrip.arrivals.append(Airplane(34,"arr34","B789/H","34R",1842))   # MY02542
+flightStrip.arrivals.append(Airplane(2, "arr2", "B763/H", "34R", 1757))     # MY02819
+flightStrip.arrivals.append(Airplane(4, "arr4", "B788/H", "34R", 1800))     # MY02866
+flightStrip.arrivals.append(Airplane(7, "arr7", "B738/M", "34R", 1804))     # MY03017
+flightStrip.arrivals.append(Airplane(10, "arr10", "B789/H", "34R", 1807))   # MY02407
+flightStrip.arrivals.append(Airplane(12, "arr12", "B763/H", "34R", 1811))   # MY02953
+flightStrip.arrivals.append(Airplane(16, "arr16", "B788/H", "34R", 1817))   # MY02722
+flightStrip.arrivals.append(Airplane(20, "arr20", "E190/M", "34R", 1822))   # MY03003
+flightStrip.arrivals.append(Airplane(23, "arr23", "B738/M", "34R", 1826))   # MY03148
+flightStrip.arrivals.append(Airplane(26, "arr26", "B788/H", "34R", 1831))   # MY02999
+flightStrip.arrivals.append(Airplane(29, "arr29", "B738/M", "34R", 1836))   # MY03031
+flightStrip.arrivals.append(Airplane(32, "arr32", "A359/H", "34R", 1840))   # MY03045
+flightStrip.arrivals.append(Airplane(34, "arr34", "B789/H", "34R", 1842))   # MY02542
 
-
-# シーン2のデータを追加
-# flightStrip.departures.append(Airplane(1,"dep1","34R",1402))
-# flightStrip.departures.append(Airplane(2,"dep2","34R",1408))
-# flightStrip.departures.append(Airplane(3,"dep3","34R",1419))
-# flightStrip.departures.append(Airplane(4,"dep4","34R",1422))
-# flightStrip.arrivals.append(Airplane(1,"arr001","34R",1406))
-# flightStrip.arrivals.append(Airplane(2,"arr002","34R",1409))
-# flightStrip.arrivals.append(Airplane(3,"arr003","34R",1412))
-# flightStrip.arrivals.append(Airplane(4,"arr004","34R",1417))
-# flightStrip.arrivals.append(Airplane(5,"arr005","34R",1420))
-# flightStrip.arrivals.append(Airplane(6,"arr006","34R",1424))
-# flightStrip.arrivals.append(Airplane(7,"arr007","16L",1436))
-# flightStrip.arrivals.append(Airplane(8,"arr8","16L",1439))
-# flightStrip.arrivals.append(Airplane(9,"arr9","16L",1442))
-# flightStrip.arrivals.append(Airplane(10,"arr10","16L",1444))
-# flightStrip.arrivals.append(Airplane(11,"arr11","16L",1449))
-# flightStrip.arrivals.append(Airplane(12,"arr12","16L",1451))
-
-# シーン3のデータを追加
-# flightStrip.departures.append(Airplane(1,"dep1","34R","0"+str(623)))
-# flightStrip.departures.append(Airplane(2,"dep2","34R","0"+str(631)))
-# flightStrip.departures.append(Airplane(3,"dep3","34R","0"+str(635)))
-# flightStrip.departures.append(Airplane(4,"dep4","34R","0"+str(650)))
-# flightStrip.arrivals.append(Airplane(1,"arr1","34R","0"+str(605)))
-# flightStrip.arrivals.append(Airplane(2,"arr2","34R","0"+str(609)))
-# flightStrip.arrivals.append(Airplane(3,"arr3","34R","0"+str(611)))
-# flightStrip.arrivals.append(Airplane(4,"arr4","34R","0"+str(618)))
-# flightStrip.arrivals.append(Airplane(5,"arr5","34R","0"+str(621)))
 
 @app.before_request
 def handle_preflight():
@@ -123,10 +95,33 @@ def handle_preflight():
         return ("", 200)
 
 
-
-@app.route("/",methods=["GET"])
+@app.route("/", methods=["GET"])
 def hello():
-    return jsonify({"departures": [{"id":airplane.id,"name":airplane.name,"model":airplane.model,"runway":airplane.runway,"time":airplane.time,"is_completed":airplane.is_completed} for airplane in flightStrip.departures],"arrivals": [{"id":airplane.id,"name":airplane.name,"model":airplane.model,"runway":airplane.runway,"time":airplane.time,"is_completed":airplane.is_completed} for airplane in flightStrip.arrivals]})
+    return jsonify({
+        "departures": [
+            {"id": airplane.id, "name": airplane.name, "model": airplane.model,
+             "runway": airplane.runway, "time": airplane.time,
+             "is_completed": airplane.is_completed}
+            for airplane in flightStrip.departures
+        ],
+        "arrivals": [
+            {"id": airplane.id, "name": airplane.name, "model": airplane.model,
+             "runway": airplane.runway, "time": airplane.time,
+             "is_completed": airplane.is_completed}
+            for airplane in flightStrip.arrivals
+        ]
+    })
+
+
+def add_minutes_hhmm(t, minutes):
+    """HHMM形式の整数に分を足して繰り上げる（例: 1757 + 20 -> 1817）"""
+    try:
+        t = int(t)
+    except (TypeError, ValueError):
+        return t
+    h, m = divmod(t, 100)
+    total = (h * 60 + m + minutes) % (24 * 60)  # 24時をまたいだら0時に戻す
+    return (total // 60) * 100 + (total % 60)
 
 
 # 緊急ボタンが押されたときの処理
@@ -154,6 +149,50 @@ def update_emergency():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+# ゴーアラウンド：指定した到着機と同じ便名で、着陸予定を20分後にした到着ストリップを追加する
+@app.route('/goaround', methods=['POST'])
+def goaround():
+    try:
+        data = request.get_json(silent=True) or {}
+        try:
+            airplane_id = int(data.get('id'))
+        except (TypeError, ValueError):
+            return jsonify({'error': 'invalid id'}), 400
+
+        arrivals = strips_data['arrivals']
+
+        # 表示中の到着ストリップから、ゴーアラウンドした機体を探す
+        original = next((s for s in arrivals if s['id'] == airplane_id), None)
+        if original is None:
+            return jsonify({'error': 'arrival strip not found'}), 404
+
+        # 着陸予定を20分後にする
+        new_time = add_minutes_hhmm(original.get('time'), 20)
+
+        # 重複しない新しいID（現在の到着IDの最大値 + 1）
+        new_id = max((s['id'] for s in arrivals), default=0) + 1
+
+        new_strip = {
+            "id": new_id,
+            "name": original.get('name'),      # ← ゴーアラウンド機と同じ便名（番号）
+            "model": original.get('model'),
+            "runway": original.get('runway'),
+            "time": new_time,
+            "is_completed": False,
+            "runway_status": None,
+        }
+
+        # 追加して着陸時刻順に並べ替える（正しい時刻位置に割り込ませる）
+        arrivals.append(new_strip)
+        arrivals.sort(key=lambda s: int(s['time']))
+
+        return jsonify({'status': 'success', 'added': new_strip}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/remove_emergency', methods=['POST'])
 def remove_emergency():
     try:
@@ -161,7 +200,7 @@ def remove_emergency():
 
         if airplane_id is None:
             return jsonify({'error': 'No airplane ID provided'}), 400
-        
+
         # 到着機リストから指定された ID の飛行機を削除
         flightStrip.remove_arrival(airplane_id)
 
@@ -173,6 +212,7 @@ def remove_emergency():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/remove_strip', methods=['POST'])
 def remove_strip():
@@ -202,21 +242,12 @@ strips_data = {
 }
 
 
-
-@app.route('/add_strip', methods=['GET','POST'])
+@app.route('/add_strip', methods=['GET', 'POST'])
 def add_strip():
     data = request.get_json()
     airplane_type = data['type']
     strip_data = data['strip_data']
     airplane_id = strip_data['id']
-
-   
-    # 出発機または到着機のストリップを追加
-    # if airplane_type == 'departure':
-    #     strips_data['departures'].append(strip_data)
-    # elif airplane_type == 'arrival':
-    #     strips_data['arrivals'].append(strip_data)
-    # return jsonify({"status": "success"})
 
     # すでに同じIDの航空機が存在するか確認
     for strip in strips_data[airplane_type + 's']:
@@ -233,6 +264,7 @@ def add_strip():
 
 # TAKE OFF / LINE UP / LAND ボタンでストリップにステータスを付ける
 RUNWAY_STATUSES = ("takeoff", "lineup", "land", "goaround")
+
 
 @app.route('/update_runway_status', methods=['POST'])
 def update_runway_status():
@@ -258,10 +290,6 @@ def update_runway_status():
             return jsonify({"status": "success", "updated_strip": strip}), 200
 
     return jsonify({"error": "Strip not found"}), 404
-    
-
-
-
 
 
 @app.route('/update_status', methods=["GET", "POST"])
@@ -302,14 +330,11 @@ def update_strips_data(airplane_type, updated_plane):
             strip["is_completed"] = updated_plane.is_completed
             break
 
+
 @app.route('/get_strips', methods=['GET'])
 def get_strips():
     # 保存されている出発機と到着機の情報を返す
-    # 最後に更新された情報のみを返す
-    # return jsonify(strips_data)
     return jsonify({**strips_data, "mixed_order": mixed_order})
-
-
 
 
 # ドラッグ＆ドロップで移動できるゾーン（フロントのコンテナIDとそのまま対応）
@@ -320,6 +345,7 @@ ALLOWED_LANES = (
     "runwayOccupancyContainer",
     "stripContainerMid",
 )
+
 
 @app.route('/update_order_mixed', methods=['POST'])
 def update_order_mixed():
@@ -365,6 +391,7 @@ def update_order_mixed():
     mixed_order = cleaned
     return jsonify({"ok": True, "saved_count": len(mixed_order), "mixed_order": mixed_order})
 
+
 @app.route('/update_strip', methods=['POST'])
 def update_strip():
     data = request.get_json()
@@ -394,6 +421,7 @@ def update_strip():
     else:
         return jsonify({"status": "error", "message": "Strip not found"}), 404
 
+
 @app.route('/update_order', methods=['POST'])
 def update_order():
     data = request.get_json()
@@ -416,6 +444,7 @@ def update_order():
 
     return jsonify({"status": "success", "updated_data": target_list})
 
+
 @app.route('/update_arrivals', methods=['POST'])
 def update_arrivals():
     # リクエストからJSONデータを取得
@@ -432,11 +461,14 @@ def update_arrivals():
         # arrivalsデータが含まれていない場合のエラーハンドリング
         return jsonify({'status': 'error', 'message': 'No arrivals data provided'}), 400
 
+
 wind_data = {"dir": 270, "spd": 12, "dir2": 270, "spd2": 12}  # デフォルト値（2局分）
+
 
 @app.route('/get_wind', methods=['GET'])
 def get_wind():
     return jsonify(wind_data)
+
 
 @app.route('/update_wind', methods=['POST'])
 def update_wind():
@@ -445,6 +477,7 @@ def update_wind():
     for key in ("dir", "spd", "dir2", "spd2"):
         wind_data[key] = data.get(key, wind_data[key])
     return jsonify({"ok": True, "wind": wind_data})
+
 
 if __name__ == "__main__":
     app.run(debug=True)
