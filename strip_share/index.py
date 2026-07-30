@@ -462,7 +462,7 @@ def update_arrivals():
         return jsonify({'status': 'error', 'message': 'No arrivals data provided'}), 400
 
 
-wind_data = {"dir": 270, "spd": 12, "dir2": 270, "spd2": 12}  # デフォルト値（2局分）
+wind_data = {"dir": 20, "spd": 4, "dir2": 90, "spd2": 6}  # デフォルト値（2局分）
 
 
 @app.route('/get_wind', methods=['GET'])
