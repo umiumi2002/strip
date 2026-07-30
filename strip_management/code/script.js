@@ -58,18 +58,22 @@ function initializeStrips() {
     .catch((error) => console.error("データの取得エラー:", error));
 }
 
-/** ====== add strip（IDベースで「まだ表示していない便」を1枚出す） ====== */
+/** ====== add strip（IDベースで「まだ表示していない便」を1枚出す） ======
+ * master（未表示プール）は毎回サーバから取り直す。
+ * こうすることで、ゴーアラウンドで追加された便もページ再読込を待たずに出せる。
+ */
 async function addStrip(containerId) {
   console.log("✅ addStrip called! containerId =", containerId);
 
-  const openData = await fetch(`${BASE_URL}/get_strips`)
-    .then((response) => response.json())
-    .then((data) => data);
+  const [openData, masterData] = await Promise.all([
+    fetch(`${BASE_URL}/get_strips`).then((r) => r.json()),
+    fetch(`${BASE_URL}/`).then((r) => r.json()),
+  ]);
 
   if (containerId === "takeoffStripContainer") {
-    // すでに表示中のIDを集めて、flightdataの先頭から未表示の便を探す
+    // すでに表示中のIDを集めて、masterの先頭（＝時刻順）から未表示の便を探す
     const openIds = new Set((openData.departures || []).map((s) => s.id));
-    const next = (flightdata.departures || []).find((s) => !openIds.has(s.id));
+    const next = (masterData.departures || []).find((s) => !openIds.has(s.id));
     if (!next) return;
 
     console.log("🚀 Adding departure strip:", next);
@@ -82,7 +86,7 @@ async function addStrip(containerId) {
     location.reload();
   } else if (containerId === "landingStripContainer") {
     const openIds = new Set((openData.arrivals || []).map((s) => s.id));
-    const next = (flightdata.arrivals || []).find((s) => !openIds.has(s.id));
+    const next = (masterData.arrivals || []).find((s) => !openIds.has(s.id));
     if (!next) return;
 
     console.log("🚀 Adding arrival strip:", next);

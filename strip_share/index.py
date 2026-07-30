@@ -150,7 +150,9 @@ def update_emergency():
         return jsonify({'error': str(e)}), 500
 
 
-# ゴーアラウンド：指定した到着機と同じ便名で、着陸予定を20分後にした到着ストリップを追加する
+# ゴーアラウンド：指定した到着機と同じ便名で、着陸予定を20分後にした到着ストリップを
+# 「未表示プール(flightStrip.arrivals)」へ追加する。
+# → 押した瞬間には出ず、add strip を押したときに時刻順で出てくる。
 @app.route('/goaround', methods=['POST'])
 def goaround():
     try:
@@ -160,34 +162,33 @@ def goaround():
         except (TypeError, ValueError):
             return jsonify({'error': 'invalid id'}), 400
 
-        arrivals = strips_data['arrivals']
-
-        # 表示中の到着ストリップから、ゴーアラウンドした機体を探す
-        original = next((s for s in arrivals if s['id'] == airplane_id), None)
+        # ゴーアラウンドした機体を、表示中の到着ストリップから探す
+        original = next((s for s in strips_data['arrivals'] if s['id'] == airplane_id), None)
         if original is None:
             return jsonify({'error': 'arrival strip not found'}), 404
 
         # 着陸予定を20分後にする
         new_time = add_minutes_hhmm(original.get('time'), 20)
 
-        # 重複しない新しいID（現在の到着IDの最大値 + 1）
-        new_id = max((s['id'] for s in arrivals), default=0) + 1
+        # 既存の全到着ID（未表示プール + 表示中）と重複しない新ID
+        existing_ids = [a.id for a in flightStrip.arrivals] + [s['id'] for s in strips_data['arrivals']]
+        new_id = (max(existing_ids) if existing_ids else 0) + 1
 
-        new_strip = {
-            "id": new_id,
-            "name": original.get('name'),      # ← ゴーアラウンド機と同じ便名（番号）
-            "model": original.get('model'),
-            "runway": original.get('runway'),
-            "time": new_time,
-            "is_completed": False,
-            "runway_status": None,
-        }
+        # 未表示プール(master)に追加し、着陸時刻順に並べ替える
+        # （add strip はこのプールの先頭の未表示便から順に出すので、時刻順で登場する）
+        flightStrip.arrivals.append(
+            Airplane(new_id, original.get('name'), original.get('model'),
+                     original.get('runway'), new_time)
+        )
+        flightStrip.arrivals.sort(key=lambda a: int(a.time))
 
-        # 追加して着陸時刻順に並べ替える（正しい時刻位置に割り込ませる）
-        arrivals.append(new_strip)
-        arrivals.sort(key=lambda s: int(s['time']))
-
-        return jsonify({'status': 'success', 'added': new_strip}), 200
+        return jsonify({'status': 'success', 'added': {
+            'id': new_id,
+            'name': original.get('name'),
+            'model': original.get('model'),
+            'runway': original.get('runway'),
+            'time': new_time,
+        }}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
