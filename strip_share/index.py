@@ -12,18 +12,22 @@ mixed_order = []
 
 # クラスの定義
 class Airplane:
-    def __init__(self, id, name, model, runway, time):
+    def __init__(self, id, name, model, runway, time, callsign=None):
         self.id = id
         self.name = name
         self.model = model  # モデル名
         self.runway = runway
         self.time = time
         self.is_completed = False
+        # ★ コールサイン（表示名用）。未指定なら name にフォールバック。
+        #    識別キーは従来通り id。name も残す（内部照合用）。
+        self.callsign = callsign if callsign else name
 
     def to_dict(self):
         return {
             "id": self.id,
             "name": self.name,
+            "callsign": self.callsign,   # ★ 追加
             "model": self.model,
             "runway": self.runway,
             "time": self.time,
@@ -52,41 +56,44 @@ class FlightStrip:
 flightStrip = FlightStrip()
 
 # シーン1のデータを追加
+# name をコールサインに直接変更（id は識別キーなので不変）。旧: dep7/arr2 等 → 便名表示。
 # ===== DEPARTURES (C滑走路, 離陸時刻順) =====
-flightStrip.departures.append(Airplane(7, "dep7", "B763/H", "34R", 0))    # MY03122
-flightStrip.departures.append(Airplane(1, "dep1", "A359/H", "34R", 0))    # MY03119
-flightStrip.departures.append(Airplane(10, "dep10", "E190/M", "34R", 0))  # MY03128
-flightStrip.departures.append(Airplane(8, "dep8", "B738/M", "34R", 0))    # MY03125
-flightStrip.departures.append(Airplane(11, "dep11", "A339/H", "34R", 0))  # MY03103
-flightStrip.departures.append(Airplane(13, "dep13", "B788/H", "34R", 0))  # MY03124
-flightStrip.departures.append(Airplane(2, "dep2", "B738/M", "34R", 0))    # MY03157
-flightStrip.departures.append(Airplane(5, "dep5", "B737/M", "34R", 0))    # MY03173
-flightStrip.departures.append(Airplane(12, "dep12", "B738/M", "34R", 0))  # MY03164
-flightStrip.departures.append(Airplane(3, "dep3", "B763/H", "34R", 0))    # MY03159
-flightStrip.departures.append(Airplane(6, "dep6", "B763/H", "34R", 0))    # MY03162
-flightStrip.departures.append(Airplane(4, "dep4", "B78X/H", "34R", 0))    # MY03141
-flightStrip.departures.append(Airplane(19, "dep19", "B763/H", "34R", 0))  # MY03214
-flightStrip.departures.append(Airplane(21, "dep21", "B788/H", "34R", 0))  # MY03232
-flightStrip.departures.append(Airplane(17, "dep17", "B772/H", "34R", 0))  # MY03211
-flightStrip.departures.append(Airplane(30, "dep30", "B789/H", "34R", 0))  # MY03272
-flightStrip.departures.append(Airplane(28, "dep28", "B738/M", "34R", 0))  # MY03256
-flightStrip.departures.append(Airplane(32, "dep32", "B763/H", "34R", 0))  # MY03283
-flightStrip.departures.append(Airplane(31, "dep31", "B738/M", "34R", 0))  # MY03277
-flightStrip.departures.append(Airplane(33, "dep33", "B738/M", "34R", 0))  # MY03289
+flightStrip.departures.append(Airplane(7, "ANA557", "B763/H", "34R", 0))    # MY03122 (旧 dep7)
+flightStrip.departures.append(Airplane(1, "JAL525", "A359/H", "34R", 0))    # MY03119 (旧 dep1)
+flightStrip.departures.append(Airplane(10, "ANA537", "E190/M", "34R", 0))   # MY03128 (旧 dep10)
+flightStrip.departures.append(Airplane(8, "ACA2", "B738/M", "34R", 0))      # MY03125 (旧 dep8)
+flightStrip.departures.append(Airplane(11, "DAL8", "A339/H", "34R", 0))     # MY03103 (旧 dep11)
+flightStrip.departures.append(Airplane(13, "SNJ79", "B788/H", "34R", 0))    # MY03124 (旧 dep13)
+flightStrip.departures.append(Airplane(2, "JAL545", "B738/M", "34R", 0))    # MY03157 (旧 dep2)
+flightStrip.departures.append(Airplane(5, "ANA657", "B737/M", "34R", 0))    # MY03173 (旧 dep5)
+flightStrip.departures.append(Airplane(12, "JAL557", "B738/M", "34R", 0))   # MY03164 (旧 dep12)
+flightStrip.departures.append(Airplane(3, "JAL613", "B763/H", "34R", 0))    # MY03159 (旧 dep3)
+flightStrip.departures.append(Airplane(6, "JAL329", "B763/H", "34R", 0))    # MY03162 (旧 dep6)
+flightStrip.departures.append(Airplane(4, "ANA267", "B78X/H", "34R", 0))    # MY03141 (旧 dep4)
+flightStrip.departures.append(Airplane(19, "SNJ25", "B763/H", "34R", 0))    # MY03214 (旧 dep19)
+flightStrip.departures.append(Airplane(21, "JAL669", "B788/H", "34R", 0))   # MY03232 (旧 dep21)
+flightStrip.departures.append(Airplane(17, "ANA891", "B772/H", "34R", 0))   # MY03211 (旧 dep17)
+# //flightStrip.departures.append(Airplane(30, "ANA75", "B789/H", "34R", 0))  # MY03272 (旧 dep30)
+
+# 31,33,32の順番だった
+flightStrip.departures.append(Airplane(28, "JAL579", "B738/M", "34R", 0))   # MY03256 (旧 dep28)
+flightStrip.departures.append(Airplane(31, "ANA407", "B763/H", "34R", 0))   # MY03283 (旧 dep32)
+flightStrip.departures.append(Airplane(33, "SFJ53", "B738/M", "34R", 0))    # MY03277 (旧 dep31)
+flightStrip.departures.append(Airplane(32, "JAL566", "B738/M", "34R", 0))   # MY03289 (旧 dep33)
 
 # ===== ARRIVALS (C滑走路, 着陸時刻順) =====
-flightStrip.arrivals.append(Airplane(2, "arr2", "B763/H", "34R", 1757))     # MY02819
-flightStrip.arrivals.append(Airplane(4, "arr4", "B788/H", "34R", 1800))     # MY02866
-flightStrip.arrivals.append(Airplane(7, "arr7", "B738/M", "34R", 1804))     # MY03017
-flightStrip.arrivals.append(Airplane(10, "arr10", "B789/H", "34R", 1807))   # MY02407
-flightStrip.arrivals.append(Airplane(12, "arr12", "B763/H", "34R", 1811))   # MY02953
-flightStrip.arrivals.append(Airplane(16, "arr16", "B788/H", "34R", 1817))   # MY02722
-flightStrip.arrivals.append(Airplane(20, "arr20", "E190/M", "34R", 1822))   # MY03003
-flightStrip.arrivals.append(Airplane(23, "arr23", "B738/M", "34R", 1826))   # MY03148
-flightStrip.arrivals.append(Airplane(26, "arr26", "B788/H", "34R", 1831))   # MY02999
-flightStrip.arrivals.append(Airplane(29, "arr29", "B738/M", "34R", 1836))   # MY03031
-flightStrip.arrivals.append(Airplane(32, "arr32", "A359/H", "34R", 1840))   # MY03045
-flightStrip.arrivals.append(Airplane(34, "arr34", "B789/H", "34R", 1842))   # MY02542
+flightStrip.arrivals.append(Airplane(2, "JAL556", "B763/H", "34R", 1757))    # MY02819 (旧 arr2)
+flightStrip.arrivals.append(Airplane(4, "ANA70", "B788/H", "34R", 1800))     # MY02866 (旧 arr4)
+flightStrip.arrivals.append(Airplane(7, "ANA750", "B738/M", "34R", 1804))    # MY03017 (旧 arr7)
+flightStrip.arrivals.append(Airplane(10, "JAL9", "B789/H", "34R", 1807))     # MY02407 (旧 arr10)
+flightStrip.arrivals.append(Airplane(12, "ADO60", "B763/H", "34R", 1811))    # MY02953 (旧 arr12)
+flightStrip.arrivals.append(Airplane(16, "ANA92", "B788/H", "34R", 1817))    # MY02722 (旧 arr16)
+flightStrip.arrivals.append(Airplane(20, "JAL914", "E190/M", "34R", 1822))   # MY03003 (旧 arr20)
+flightStrip.arrivals.append(Airplane(23, "ANA1896", "B738/M", "34R", 1826))  # MY03148 (旧 arr23)
+flightStrip.arrivals.append(Airplane(26, "ANA72", "B788/H", "34R", 1831))    # MY02999 (旧 arr26)
+flightStrip.arrivals.append(Airplane(29, "SNJ62", "B738/M", "34R", 1836))    # MY03031 (旧 arr29)
+flightStrip.arrivals.append(Airplane(32, "JAL518", "A359/H", "34R", 1840))   # MY03045 (旧 arr32)
+flightStrip.arrivals.append(Airplane(34, "ANA115", "B789/H", "34R", 1842))   # MY02542 (旧 arr34)
 
 
 @app.before_request
@@ -99,14 +106,14 @@ def handle_preflight():
 def hello():
     return jsonify({
         "departures": [
-            {"id": airplane.id, "name": airplane.name, "model": airplane.model,
-             "runway": airplane.runway, "time": airplane.time,
+            {"id": airplane.id, "name": airplane.name, "callsign": airplane.callsign,
+             "model": airplane.model, "runway": airplane.runway, "time": airplane.time,
              "is_completed": airplane.is_completed}
             for airplane in flightStrip.departures
         ],
         "arrivals": [
-            {"id": airplane.id, "name": airplane.name, "model": airplane.model,
-             "runway": airplane.runway, "time": airplane.time,
+            {"id": airplane.id, "name": airplane.name, "callsign": airplane.callsign,
+             "model": airplane.model, "runway": airplane.runway, "time": airplane.time,
              "is_completed": airplane.is_completed}
             for airplane in flightStrip.arrivals
         ]
@@ -134,7 +141,7 @@ def update_emergency():
         # 最後列データのtimeを取得
         last_arrival_time = flightStrip.arrivals[-1].time
 
-        # 新しい到着機データを作成
+        # 新しい到着機データを作成（コールサインは便名にフォールバック）
         new_flight = Airplane(arrival_count + 1, f'arr{arrival_count + 1}', 'B77W/H', '16L', last_arrival_time + 5)
 
         # 新しい到着機を arrivals に追加
@@ -178,13 +185,14 @@ def goaround():
         # （add strip はこのプールの先頭の未表示便から順に出すので、時刻順で登場する）
         flightStrip.arrivals.append(
             Airplane(new_id, original.get('name'), original.get('model'),
-                     original.get('runway'), new_time)
+                     original.get('runway'), new_time, original.get('callsign'))  # ★ コールサイン引き継ぎ
         )
         flightStrip.arrivals.sort(key=lambda a: int(a.time))
 
         return jsonify({'status': 'success', 'added': {
             'id': new_id,
             'name': original.get('name'),
+            'callsign': original.get('callsign'),   # ★ 追加
             'model': original.get('model'),
             'runway': original.get('runway'),
             'time': new_time,
